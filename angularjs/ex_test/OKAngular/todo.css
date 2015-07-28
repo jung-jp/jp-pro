@@ -1,0 +1,8 @@
+.done-true {
+  text-decoration: line-through;
+  color: grey;
+}
+.done-false {
+  font-weight:bold;
+  color: #ed7575;
+}
