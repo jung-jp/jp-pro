@@ -2,7 +2,7 @@
 import scrapy
 from scrapy.item import Item, Field
 
-class SaraminWebItem(Item):
+class WebItem(Item):
     site = Field()
     rank = Field()
     title = Field()
