@@ -13,11 +13,6 @@ db_name = 'test'
 
 class SaveItem(object):
 
-    def __init__(self):
-        """ A """
-        #self.conn = MySQLdb.connect(user='root', '', 'saramin_db_test', 'localhost', charset="utf8", use_unicode=True)
-        #self.cursor = self.conn.cursor()
-
     def process_item(self, item, spider):
         db = MySQLdb.connect(db_host, db_user, db_pass, db_name, use_unicode = True, charset = "utf8")
         cursor = db.cursor()
