@@ -9,7 +9,7 @@ from scrapy.http import Request
 db_host = 'localhost'
 db_user = 'root'
 db_pass= ''
-db_name = 'saramin_db_test'
+db_name = 'test'
 
 class SaveItem(object):
 
@@ -22,7 +22,7 @@ class SaveItem(object):
         db = MySQLdb.connect(db_host, db_user, db_pass, db_name, use_unicode = True, charset = "utf8")
         cursor = db.cursor()
         query = (
-            """ INSERT INTO saramin_layout_analytics
+            """ INSERT INTO test
                (site_type, rank, title, request_url, response_url, doctype, css,
                 js, layout, sidebar, emulate, embed_style_cnt, embed_script_cnt, reg_dt)
              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, now()) """
