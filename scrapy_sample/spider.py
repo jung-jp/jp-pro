@@ -4,35 +4,35 @@ from scrapy.contrib.spiders import Rule
 from scrapy.contrib.spiders.init import InitSpider
 from scrapy.http import Request, FormRequest
 
-## Spider¿¡¼­ InitSpider¸¦ ¹Þ´Â´Ù.
+## Spiderì—ì„œ InitSpiderë¥¼ ë°›ëŠ”ë‹¤.
 class TestSpider(InitSpider):
 
     name = "test"
-    allowed_domains = ["saramin.co.kr"]
-    login_page = "http://mt.local.saramin.co.kr/zf_user/auth/login"
-    start_urls = "http://mt.local.saramin.co.kr/zf_user"
-  #Rule °´Ã¼¸¦ ÀÌ¿ëÇØ Å©·Ñ¸µ µÇ´Â »çÀÌÆ®ÀÇ µ¿ÀÛÀ» Á¤ÀÇ ÇÑ´Ù.
+    allowed_domains = ["test.co.kr"]
+    login_page = "http://local.test.co.kr/login"
+    start_urls = "http://local.test.co.kr/"
+  #Rule ê°ì²´ë¥¼ ì´ìš©í•´ í¬ë¡¤ë§ ë˜ëŠ” ì‚¬ì´íŠ¸ì˜ ë™ìž‘ì„ ì •ì˜ í•œë‹¤.
     rules = (
         #Rule(SgmlLinkExtractor(allow=r'-\w+.html$'), callback='parse_item', follow=True),
-        Rule(SgmlLinkExtractor(allow=("\mt\.local\.aramin\.co\.kr[^\s]*\/*$")), callback='parse_item', follow=True),
+        Rule(SgmlLinkExtractor(allow=("local\.test\.co\.kr[^\s]*\/*$")), callback='parse_item', follow=True),
     )
 
-  ## initRequest ¸Þ¼Òµå°¡ ¸Ç Ã³À½ ½ÃÀÛ µÊ.
+  ## initRequest ë©”ì†Œë“œê°€ ë§¨ ì²˜ìŒ ì‹œìž‘ ë¨.
     def init_request(self):
-      ## ·Î±×ÀÎ ÆäÀÌÁö¿Í callback ÁöÁ¤
+      ## ë¡œê·¸ì¸ íŽ˜ì´ì§€ì™€ callback ì§€ì •
         return Request(url=self.login_page, callback=self.login)
 
-  ## FormRequest¸¦ ÀÌ¿ëÇØ¼­ ÇØ´ç ÆäÀÌÁö¿¡¼­ submit¿äÃ»À» º¸³½´Ù.
+  ## FormRequestë¥¼ ì´ìš©í•´ì„œ í•´ë‹¹ íŽ˜ì´ì§€ì—ì„œ submitìš”ì²­ì„ ë³´ë‚¸ë‹¤.
     def login(self, response):
         return FormRequest.from_response(response,
-                    formdata={'id': 'com222', 'password': '90909090'},
+                    formdata={'id': '0000', 'password': '0000'},
                     callback=self.check_login_response)
 
-  ## responseµÈ htmlÀ» ÆÄ½ÌÇØ¼­ ·Î±×ÀÎ ¿©ºÎ¸¦ ÆÇ´Ü ÇÑ´Ù.
+  ## responseëœ htmlì„ íŒŒì‹±í•´ì„œ ë¡œê·¸ì¸ ì—¬ë¶€ë¥¼ íŒë‹¨ í•œë‹¤.
     def check_login_response(self, response):
         //check login success
-        if "/zf_user/auth/logout" in response.body:
-          ## ·Î±×ÀÎÀÌ ¼º°øÇÏ¸é initialized¸¦ ½ÇÇàÇØ ÆÄ½ÌÀ» ½ÃÀÛÇÑ´Ù.
+        if "/auth/logout" in response.body:
+          ## ë¡œê·¸ì¸ì´ ì„±ê³µí•˜ë©´ initializedë¥¼ ì‹¤í–‰í•´ íŒŒì‹±ì„ ì‹œìž‘í•œë‹¤.
             return self.initialized()
         else
             return self.error()
@@ -41,11 +41,11 @@ class TestSpider(InitSpider):
         return Request(url=self.start_urls, callback=self.parse_item)
 
     def parse_item(self, response):
-        ## Áßº¹Ã³¸®¸¦ À§ÇØ ¼öÁýµÈ urlÀ» ºÒ·¯¿È.
+        ## ì¤‘ë³µì²˜ë¦¬ë¥¼ ìœ„í•´ ìˆ˜ì§‘ëœ urlì„ ë¶ˆëŸ¬ì˜´.
         if self.isFirstLoop :
             self.tempUrls = self.getUrlSet()
             self.isFirstLoop = 0;
-        site = "saramin"
+        site = "test"
         rank = "0"
         title = response.xpath('//title/text()').extract()
         req_url = response.request.url.replace('http://'+host, '', 1)
@@ -59,15 +59,15 @@ class TestSpider(InitSpider):
         emulate = response.xpath('//meta[contains(@content, "IE")]/@content').extract()
         embed_style_cnt = len(response.xpath('//style').extract())
         embed_script_cnt = len(response.xpath('//script').extract()) - len(response.xpath('//script/@src').extract())
-        # È£½ºÆ®ºÎºÐÀº Á¦°ÅÇØ ÁØ´Ù.
-        ckurl = req_url.replace("http://mt.local.saramin.co.kr", "")
-        ckurl = req_url.replace("https://mt.local.saramin.co.kr", "")
+        # í˜¸ìŠ¤íŠ¸ë¶€ë¶„ì€ ì œê±°í•´ ì¤€ë‹¤.
+        ckurl = req_url.replace("http://local.test.co.kr", "")
+        ckurl = req_url.replace("https://local.test.co.kr", "")
         if ckurl.find('?') > -1 :
             ckurl = ckurl.split('?')[0]
         elif len(ckurl.split('/')) > 4 :
             piece = ckurl.split('/')
             ckurl = piece[0]+'/'+piece[1]+'/'+piece[2]+'/'+piece[3]+'/'+piece[4]
-                # Áßº¹ È®ÀÎ.
+                # ì¤‘ë³µ í™•ì¸.
         if ckurl in self.tempUrls:
             print ">>>>>>>>>>>>>>>[DropItem]:" + ckurl
             raise #DropItem("Duplicate url found: %s" % ckurl)
