@@ -1,12 +1,12 @@
 var React = require('react');
-var ReactDom = require('react-dom');
+var Stream = require('./Stream.react');
 var Collection = require('./Collection.react');
 
 var Application = React.createClass({
     getInitialState :function() {
-        return (
+        return {
             collectionTweets : {}
-        )
+        }
     },
 
     addTweetToCollection : function(tweet) {
@@ -51,3 +51,6 @@ var Application = React.createClass({
         );
     }
 });
+
+
+module.exports = Application;

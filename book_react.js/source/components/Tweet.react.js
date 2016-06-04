@@ -1,3 +1,4 @@
+
 var React = require('react');
 
 var tweetStyle = {
@@ -45,7 +46,7 @@ var Tweet = React.createClass({
         var tweetMediaUrl = tweet.media[0].url;
         return (
             <div style={tweetStyle}>
-                <image src={tweetMediaUrl} onClick={this.handleImageClick} style={imageStyle} />
+                <img src={tweetMediaUrl} onClick={this.handleImageClick} style={imageStyle} />
             </div>
         )
     }
