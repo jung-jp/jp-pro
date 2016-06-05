@@ -19,7 +19,7 @@ var Collection = React.createClass({
         return Object.keys(this.props.tweets);
     },
     getNumberOfTweetsInCollection: function() {
-        return this.getListOfTweetIds().lenght;
+        return this.getListOfTweetIds().length;
     },
     render : function() {
         var numberOfTweetsInCollection = this.getNumberOfTweetsInCollection();

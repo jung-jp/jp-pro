@@ -56,7 +56,7 @@ var CollectionControls = React.createClass({
                 <Header text={this.getHeaderText()} />
                 <Button label="Rename collection" handleClick={this.toggleEditCollectionName} />
                 <Button label="Empty collection" handleClick={this.onRemoveAllTweetsFromCollection} />
-                <CollectionExportForm htmllMarkup={this.prop.htmlMarkup} />
+                <CollectionExportForm htmlMarkup={this.prop.htmlMarkup} />
             </div>
         )
     }

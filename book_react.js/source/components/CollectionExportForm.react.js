@@ -15,4 +15,4 @@ var CollectionExportForm = React.createClass({
     }
 });
 
-module.export = CollectionExportForm;
+module.exports = CollectionExportForm;
