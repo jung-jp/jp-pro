@@ -74,90 +74,6 @@ function List() {
         return this.listSize;
     }
 }
-//
-// /* :: ES6 :: */
-// const List = (_ => {
-//     const dataStore = Symbol();
-//     class List {
-//         constructor(...a) {
-//             this[dataStore] = a || [];
-//             this.curr = 0;
-//         }
-//         [Symbol.iterrator]() {
-//             this.curr = 0;
-//             return this;
-//         }
-//         find(element) {
-//             return this[dataStore].indexOf(element);
-//         }
-//         toString() {
-//             return this[dataStore];
-//         }
-//         append(element) {
-//             this[dataStore].push(element);
-//             return this;
-//         }
-//         insert(element, after) {
-//             var insertPos = this.find(after);
-//             if(insertPos > -1) {
-//                 this[dataStore].splice(insertPos + 1, 0 , element);
-//                 return true;
-//             }
-//             return false;
-//         }
-//         remove(element) {
-//             var foundAt = this.find(element);
-//             if(foundAt > -1) {
-//                 this[dataStore].splice(foundAt, 1);
-//                 return true;
-//             }
-//             return false;
-//         }
-//         clear() {
-//             delete this[dataStore];
-//             this[dataStore] = [];
-//             this.curr = 0;
-//         }
-//         contains(element) {
-//             return this.find(element) > -1 ? true : false;
-//         }
-//         front() {
-//             this.curr = 0;
-//         }
-//         end() {
-//             this.curr = this[dataStore].length - 1;
-//         }
-//         prev() {
-//             let res = this.getElem();
-//             if(!res.done) {
-//                 this.curr--;
-//             }
-//             return res;
-//         }
-//         currPos() {
-//             return this.curr;
-//         }
-//         moveTo(pos) {
-//             this.curr = pos;
-//         }
-//         getElem() {
-//             if(this.curr >= 0 && this.curr < this.length) {
-//                 return {
-//                     done : false,
-//                     value : this[dataStore][this.curr]
-//                 }
-//             }
-//             return {
-//                 done : true,
-//                 value : undefined
-//             }
-//         }
-//         length() {
-//             return this[dataStore].length;
-//         }
-//     }
-//     return List;
-// });
 
 const films =
 `The Shqwshank Redemption
@@ -188,9 +104,6 @@ function createArr(text) {
     }
     return arr;
 }
-
-// es6
-// const createArr = text => text.split('\n').map()(_=>_.trim());
 
 // 3.4.2 리스트로 상점 관리하기
 
@@ -225,18 +138,31 @@ function checkOut(name, movie, filmList, customerList) {
     }
 }
 
-// es6
-// const movieList = new List(...movies);
+var movies = createArr(films);
+var movieList = new List();
+var customers = new List();
+
+for( var i = 0; i < movies.length; ++i) {
+    movieList.append(movies[i]);
+}
+
+console.log('Available Movies : \n');
+displayList(movieList);
+
+// var name = prompt('Enter your name');
+// var movie = prompt('What movie would you list?');
+var name = 'user1',
+    movie = 'Goodfellas'
+;
+// checkOut(name, movie, movieList, customers);
 //
-// const displayList = list => {
-//     for(let o of list) {
-//         if(Customer && o.instanceof Customer) {
-//             console.log('${o.name}, ${o.movie}');
-//         } else {
-//             console.log(o);
-//         }
-//     }
-// }
+// console.log('\nCustomer Rentals: \n');
+// displayList(customers);
+//
+// console.log('\nMovies Now Available\n');
+// displayList(movieList);
+
+// ============================================================================
 
 /**
  * 현재 리스트의 모든 요소보다 클 때에만 새로운 요소를 삽입한디.
@@ -292,31 +218,10 @@ function convertAsciiArray(values) {
     }
     return asciiList;
 }
-
-var movies = createArr(films);
-var movieList = new List();
-var customers = new List();
-
-for( var i = 0; i < movies.length; ++i) {
-    movieList.append(movies[i]);
-}
-
-console.log('Available Movies : \n');
-displayList(movieList);
-
-// var name = prompt('Enter your name');
-// var movie = prompt('What movie would you list?');
-var name = 'user1',
-    movie = 'Goodfellas'
-;
-// checkOut(name, movie, movieList, customers);
-//
-// console.log('\nCustomer Rentals: \n');
-// displayList(customers);
-//
-// console.log('\nMovies Now Available\n');
-// displayList(movieList);
-
-
 //addMovie('aaaaaa', movieList, 'max') ;
 //addMovie('123', movieList, 'min') ;
+//
+//고객이 대여한 영화를 대여된 영화 리스트로 추가하시오.
+//그리고 고객이 영화를 대여할 때마다 대여된 영화 리스트를 출력하시오.
+//
+//
