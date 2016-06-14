@@ -28160,7 +28160,12 @@
 	var ReactDOM = __webpack_require__(38);
 	var Header = __webpack_require__(222);
 	var Tweet = __webpack_require__(223);
-	
+	//
+	// <p><b>{this.state.tweetKeyword}</b> :: {replaceKeyword(this.state.tweetText, this.state.tweetKeyword)}</p>
+	// function replaceKeyword(text, keyword) {
+	//     console.log(text);
+	//     return text.toString().replace(keyword, `<b>${keyword}<b>`);
+	// }
 	var StreamTweet = React.createClass({displayName: "StreamTweet",
 	
 	    getInitialState : function() {
@@ -28204,7 +28209,9 @@
 	        var headerText;
 	
 	        this.setState({
-	            numberOfCharactersIsIncreasing: isNumberOfCharactersincreasing
+	            numberOfCharactersIsIncreasing: isNumberOfCharactersincreasing,
+	            tweetText : nextProps.tweet.text,
+	            tweetKeyword : nextProps.tweet.keyword
 	        })
 	
 	        if (isNumberOfCharactersincreasing) {
@@ -28244,9 +28251,13 @@
 	    },
 	
 	    render : function() {
+	        var keyword = this.state.tweetKeyword || '';
+	        var text = this.state.tweetText || '';
+	        var tweetText = text.replace(new RegExp('('+keyword+')', 'ig'), `{<b>}$1{</b>}`);
 	        return (
 	            React.createElement("section", null, 
 	                React.createElement(Header, {text: this.state.headerText}), 
+	                React.createElement("p", null, ":: ", React.createElement("b", null, this.state.tweetKeyword), " :: ", tweetText), 
 	                React.createElement(Tweet, {tweet: this.props.tweet, onImageClick: this.props.onAddTweetToCollection})
 	            )
 	        );

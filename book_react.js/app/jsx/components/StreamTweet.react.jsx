@@ -2,7 +2,12 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Header = require('./Header.react');
 var Tweet = require('./Tweet.react');
-
+//
+// <p><b>{this.state.tweetKeyword}</b> :: {replaceKeyword(this.state.tweetText, this.state.tweetKeyword)}</p>
+// function replaceKeyword(text, keyword) {
+//     console.log(text);
+//     return text.toString().replace(keyword, `<b>${keyword}<b>`);
+// }
 var StreamTweet = React.createClass({
 
     getInitialState : function() {
@@ -46,7 +51,9 @@ var StreamTweet = React.createClass({
         var headerText;
 
         this.setState({
-            numberOfCharactersIsIncreasing: isNumberOfCharactersincreasing
+            numberOfCharactersIsIncreasing: isNumberOfCharactersincreasing,
+            tweetText : nextProps.tweet.text,
+            tweetKeyword : nextProps.tweet.keyword
         })
 
         if (isNumberOfCharactersincreasing) {
@@ -86,9 +93,13 @@ var StreamTweet = React.createClass({
     },
 
     render : function() {
+        var keyword = this.state.tweetKeyword || '';
+        var text = this.state.tweetText || '';
+        var tweetText = text.replace(new RegExp('('+keyword+')', 'ig'), `{<b>}$1{</b>}`);
         return (
             <section>
                 <Header text={this.state.headerText} />
+                <p>:: <b>{this.state.tweetKeyword}</b> :: {tweetText}</p>
                 <Tweet tweet={this.props.tweet} onImageClick={this.props.onAddTweetToCollection} />
             </section>
         );
