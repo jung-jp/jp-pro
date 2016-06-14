@@ -75,6 +75,90 @@ function List() {
     }
 }
 
+/* :: ES6 :: */
+const List = (_ => {
+    const dataStore = Symbol();
+    class List {
+        constructor(...a) {
+            this[dataStore] = a || [];
+            this.curr = 0;
+        }
+        [Symbol.iterrator]() {
+            this.curr = 0;
+            return this;
+        }
+        find(element) {
+            return this[dataStore].indexOf(element);
+        }
+        toString() {
+            return this[dataStore];
+        }
+        append(element) {
+            this[dataStore].push(element);
+            return this;
+        }
+        insert(element, after) {
+            var insertPos = this.find(after);
+            if(insertPos > -1) {
+                this[dataStore].splice(insertPos + 1, 0 , element);
+                return true;
+            }
+            return false;
+        }
+        remove(element) {
+            var foundAt = this.find(element);
+            if(foundAt > -1) {
+                this[dataStore].splice(foundAt, 1);
+                return true;
+            }
+            return false;
+        }
+        clear() {
+            delete this[dataStore];
+            this[dataStore] = [];
+            this.curr = 0;
+        }
+        contains(element) {
+            return this.find(element) > -1 ? true : false;
+        }
+        front() {
+            this.curr = 0;
+        }
+        end() {
+            this.curr = this[dataStore].length - 1;
+        }
+        prev() {
+            let res = this.getElem();
+            if(!res.done) {
+                this.curr--;
+            }
+            return res;
+        }
+        currPos() {
+            return this.curr;
+        }
+        moveTo(pos) {
+            this.curr = pos;
+        }
+        getElem() {
+            if(this.curr >= 0 && this.curr < this.length) {
+                return {
+                    done : false,
+                    value : this[dataStore][this.curr]
+                }
+            }
+            return {
+                done : true,
+                value : undefined
+            }
+        }
+        length() {
+            return this[dataStore].length;
+        }
+    }
+    return List;
+});
+
 const films =
 `The Shqwshank Redemption
 The Godfather
@@ -99,11 +183,14 @@ City of God`;
 
 function createArr(text) {
     var arr = text.split('\n');
-    for(var i =0; i < arr.length; i++) {
+    for(var i =0, i < arr.length; i++) {
         arr[i] = arr[i].trim();
     }
     return arr;
 }
+
+// es6
+const createArr = text => text.split('\n').map()(_=>_.trim());
 
 // 3.4.2 리스트로 상점 관리하기
 
@@ -119,7 +206,7 @@ for(var i = 0; i < movies.length; ++i) {
 }
 
 function displayList(list) {
-    for(list.front(); list.curPos() < list.length(); list.next()) {
+    for(list.font(); list.currPos() < list.length(); list.next()) {
         if( list.getElement() instanceof Customer ) {
             console.log(list.getElement().name + ", " + list.getElement().movie);
         } else {
@@ -138,6 +225,20 @@ function checkOut(name, movie, filmList, customerList) {
     }
 }
 
+// es6
+const movieList = new List(...movies);
+
+const displayList = list => {
+    for(let o of list) {
+        if(Customer && o.instanceof Customer) {
+            console.log('${o.name}, ${o.movie}');
+        } else {
+            console.log(o);
+        }
+    }
+}
+
+
 var movies = createArr(films);
 var movieList = new List();
 var customers = new List();
@@ -149,79 +250,12 @@ for( var i = 0; i < movies.length; ++i) {
 console.log('Available Movies : \n');
 displayList(movieList);
 
-// var name = prompt('Enter your name');
-// var movie = prompt('What movie would you list?');
-var name = 'user1',
-    movie = 'Goodfellas'
-;
-// checkOut(name, movie, movieList, customers);
-//
-// console.log('\nCustomer Rentals: \n');
-// displayList(customers);
-//
-// console.log('\nMovies Now Available\n');
-// displayList(movieList);
+var name = prompt('Enter your name');
+var movie = prompt('What movie would you list?');
+checkOut(name, movie, movieList, customers);
 
-// ============================================================================
+console.log('\nCustomer Rentals: \n');
+display(customers);
 
-/**
- * 현재 리스트의 모든 요소보다 클 때에만 새로운 요소를 삽입한디.
- * 크다란 숫자의 경우 값의 크기, 텍스트의 경우 알파벳순서.
- */
-function addMovie(title, list, condi) {
-
-    var
-        titleAscii = convertAsciiArray([title])[0],
-        listAascii = convertAsciiArray(list.dataStore),
-        calcVal = 0;
-        ;
-
-    if ( condi == 'max' ) {
-        calcVal = Math.max.apply(null, listAascii);
-        //console.log(titleAscii, calcVal);
-        if( titleAscii <= calcVal ) {
-            console.log('not bigger');
-            return;
-        }
-    } else if ( condi == 'min' ) {
-        calcVal = Math.min.apply(null, listAascii);
-        //console.log(titleAscii, calcVal);
-        if( titleAscii >= calcVal ) {
-            console.log('not smaller');
-            return;
-        }
-    }
-
-    if (list.dataStore.indexOf(title) > -1) {
-        console.log('duplication title');
-        return;
-    }
-
-    list.append(title);
-    console.log(list);
-
-}
-
-function convertAsciiArray(values) {
-    var
-        asciiList = [],
-        str = '',
-        sum = 0
-    ;
-    for(var i=0, len = values.length; i<len; i++) {
-        for(var j=0, vLen = values[i].length; j<vLen; j++) {
-            sum += values[i].charCodeAt(j);
-        }
-        // console.log(sum + ' >> ' + values[i]);
-        asciiList.push(sum);
-        sum = 0;
-    }
-    return asciiList;
-}
-//addMovie('aaaaaa', movieList, 'max') ;
-//addMovie('123', movieList, 'min') ;
-//
-//고객이 대여한 영화를 대여된 영화 리스트로 추가하시오.
-//그리고 고객이 영화를 대여할 때마다 대여된 영화 리스트를 출력하시오.
-//
-//
+console.log('\nMovies Now Available\n');
+displayList(movieList);
