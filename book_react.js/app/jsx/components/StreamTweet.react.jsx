@@ -2,6 +2,7 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Header = require('./Header.react');
 var Tweet = require('./Tweet.react');
+var CollectionActionCreators = require('../actions/CollectionActionCreators');
 //
 // <p><b>{this.state.tweetKeyword}</b> :: {replaceKeyword(this.state.tweetText, this.state.tweetKeyword)}</p>
 // function replaceKeyword(text, keyword) {
@@ -92,6 +93,10 @@ var StreamTweet = React.createClass({
         delete window.snapterest;
     },
 
+    AddTweetToCollection : function(tweet) {
+        CollectionActionCreators.addTweetToCollection(tweet);
+    }
+
     render : function() {
         var keyword = this.state.tweetKeyword || '';
         var text = this.state.tweetText || '';
@@ -100,7 +105,7 @@ var StreamTweet = React.createClass({
             <section>
                 <Header text={this.state.headerText} />
                 <p>:: <b>{this.state.tweetKeyword}</b> :: {tweetText}</p>
-                <Tweet tweet={this.props.tweet} onImageClick={this.props.onAddTweetToCollection} />
+                <Tweet tweet={this.props.tweet} onImageClick={this.onAddTweetToCollection} />
             </section>
         );
     }

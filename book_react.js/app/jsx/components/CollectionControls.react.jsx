@@ -3,14 +3,22 @@ var Header = require('./Header.react');
 var Button = require('./Button.react');
 var CollectionRenameForm = require('./CollectionRenameForm.react');
 var CollectionExportForm = require('./CollectionExportForm.react');
+var CollectionActionCreators = require('../actions/CollectionActionCreators');
+var CollectionStore = require('../stores/CollectionStore');
 
 var CollectionControls = React.createClass({
     getInitialState : function() {
         return {
-            name : 'new',
             isEditingName : false
         };
     },
+
+    // getInitialState : function() {
+    //     return {
+    //         name : 'new',
+    //         isEditingName : false
+    //     };
+    // },
 
     getHeaderText : function() {
         var numberOfTweetsInCollection = this.props.numberOfTweetsInCollection;
@@ -34,20 +42,22 @@ var CollectionControls = React.createClass({
             isEditingName : !this.state.isEditingName
         });
     },
+    //
+    // setCollectionName : function(name) {
+    //     this.setState({
+    //         name : name,
+    //         isEditingName : false
+    //     });
+    // },
 
-    setCollectionName : function(name) {
-        this.setState({
-            name : name,
-            isEditingName : false
-        });
+    removeAllTweetsFromCollection : function() {
+        CollectionActionCreators.removeAllTweetsFromCollection();
     },
 
     render : function() {
         if (this.state.isEditingName) {
             return (
-                <CollectionRenameForm name={this.state.name}
-                    onChangeCollectionName={this.setCollectionName}
-                    onCancelCollectionNameChange={this.toggleEditCollectionName} />
+                <CollectionRenameForm onCancelCollectionNameChange={this.toggleEditCollectionName} />
             );
         }
 
@@ -55,7 +65,7 @@ var CollectionControls = React.createClass({
             <div>
                 <Header text={this.getHeaderText()} />
                 <Button label="이름 변경" handleClick={this.toggleEditCollectionName} />
-                <Button label="컬렉션 모두 삭제" handleClick={this.props.onRemoveAllTweetsFromCollection} />
+                <Button label="컬렉션 모두 삭제" handleClick={this.removeAllTweetsFromCollection} />
                 <CollectionExportForm htmlMarkup={this.props.htmlMarkup} />
             </div>
         );

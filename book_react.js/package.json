@@ -4,7 +4,14 @@
   "description": "ReactJS Boilerplate",
   "main": "app/index.html",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "jest": {
+      "unmockedModulePathPatterns": [
+        "<rootDir>/node_modules/react/",
+        "<rootDir>/node_modules/react-dom/",
+        "<rootDir>/node_modules/react-addons-test-utils/"
+      ]
+    }
   },
   "author": "정재남",
   "license": "MIT",
@@ -29,6 +36,8 @@
     "webpack-stream": "^3.2.0"
   },
   "dependencies": {
+    "flux": "^2.1.1",
+    "object-assign": "^4.1.0",
     "react": "^15.1.0",
     "react-dom": "^15.1.0"
   }
