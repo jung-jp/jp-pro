@@ -47,6 +47,9 @@
 	var React = __webpack_require__(1);
 	var ReactDom = __webpack_require__(38);
 	var Application = __webpack_require__(168);
+	var WebAPIUtils = __webpack_require__(194);
+	
+	WebAPIUtils.initializeStreamOfTweets();
 	
 	ReactDom.render(React.createElement(Application, null), document.getElementById('react-application'));
 
@@ -20325,56 +20328,25 @@
 
 	var React = __webpack_require__(1);
 	var Stream = __webpack_require__(169);
-	var Collection = __webpack_require__(222);
+	var Collection = __webpack_require__(181);
 	
 	var Application = React.createClass({displayName: "Application",
-	    getInitialState :function() {
-	        return {
-	            collectionTweets : {}
-	        }
-	    },
-	
-	    addTweetToCollection : function(tweet) {
-	        var collectionTweets = this.state.collectionTweets;
-	        collectionTweets[tweet.id] = tweet;
-	        this.setState({
-	            collectionTweets : collectionTweets
-	        });
-	    },
-	
-	    removeTweetFromCollection: function (tweet) {
-	        var collectionTweets = this.state.collectionTweets;
-	
-	        delete collectionTweets[tweet.id];
-	
-	        this.setState({
-	            collectionTweets: collectionTweets
-	        });
-	    },
-	
-	    removeAllTweetsFromCollection : function() {
-	        this.setState({
-	            collectionTweets : {}
-	        });
-	    },
 	
 	    render : function() {
 	        return (
 	            React.createElement("div", {className: "container-fluid"}, 
 	                React.createElement("div", {className: "row"}, 
 	                  React.createElement("div", {className: "col-md-4 text-center"}, 
-	                    React.createElement(Stream, {onAddTweetToCollection: this.addTweetToCollection})
+	                    React.createElement(Stream, null)
 	                  ), 
 	                  React.createElement("div", {className: "col-md-8"}, 
-	                    React.createElement(Collection, {
-	                      tweets: this.state.collectionTweets, 
-	                      onRemoveTweetFromCollection: this.removeTweetFromCollection, 
-	                      onRemoveAllTweetsFromCollection: this.removeAllTweetsFromCollection})
+	                    React.createElement(Collection, null)
 	                  )
 	                )
 	              )
 	        );
 	    }
+	
 	});
 	
 	
@@ -20386,51 +20358,1649 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1);
-	var SnapkiteStreamClient = __webpack_require__(170);
-	var StreamTweet = __webpack_require__(219);
-	var Header = __webpack_require__(220);
+	var StreamTweet = __webpack_require__(170);
+	var Header = __webpack_require__(171);
+	var TweetStore = __webpack_require__(178);
 	
 	var Stream = React.createClass({displayName: "Stream",
-	    // tweet 초기화
-	    getInitialState : function() {
-	        return {
-	            tweet : null
-	        }
-	    },
 	
-	    componentDidMount : function() {
-	        SnapkiteStreamClient.initializeStream(this.handleNewTweet);
-	    },
+	  getInitialState: function () {
+	    return {
+	      tweet: TweetStore.getTweet()
+	    };
+	  },
 	
-	    componentWillUnmount : function() {
-	        SnapkiteStreamClient.destroyStream();
-	    },
-	    //call back :: tweet를 받아와 셋 한다.
-	    handleNewTweet:function(tweet) {
-	        this.setState({
-	            tweet : tweet
-	        });
-	    },
+	  componentDidMount: function () {
+	    TweetStore.addChangeListener(this.onTweetChange);
+	  },
 	
-	    render : function() {
-	        var tweet = this.state.tweet;
-	        if ( tweet ) {
-	            return (
-	                React.createElement(StreamTweet, {tweet: tweet, onAddTweetToCollection: this.props.onAddTweetToCollection})
-	            );
-	        }
+	  componentWillUnmount: function () {
+	    TweetStore.removeChangeListener(this.onTweetChange);
+	  },
 	
-	        return (
-	            React.createElement(Header, {text: "Waiting for public photos from Twitter..."})
-	        );
+	  onTweetChange: function () {
+	    this.setState({
+	      tweet: TweetStore.getTweet()
+	    });
+	  },
+	
+	  render: function () {
+	    var tweet = this.state.tweet;
+	
+	    if (tweet) {
+	      return (
+	        React.createElement(StreamTweet, {tweet: tweet})
+	      );
 	    }
+	
+	    return (
+	      React.createElement(Header, {text: "Waiting for public photos from Twitter..."})
+	    );
+	  }
 	});
 	
 	module.exports = Stream;
 
-
 /***/ },
 /* 170 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(38);
+	var Header = __webpack_require__(171);
+	var Tweet = __webpack_require__(172);
+	var CollectionActionCreators = __webpack_require__(173);
+	
+	var StreamTweet = React.createClass({displayName: "StreamTweet",
+	
+	    getInitialState : function() {
+	        //console.log('1. getInitialState()');
+	        return {
+	            numberOfCharactersIsIncreasing : null,
+	            headerText : null
+	        };
+	    },
+	
+	    componentWillMount : function() {
+	        //console.log('2. componentWillMount()');
+	        this.setState({
+	            numberOfCharactersIsIncreasing : true,
+	            headerText : '트위터의 최근 공개 사진'
+	        });
+	
+	        window.snapterest = {
+	            numberOfReceivedTweets : 1,
+	            numberOfDisplayedTweets: 1
+	        };
+	    },
+	
+	    componentDidMound : function() {
+	        //console.log('3. componentDidMount()');
+	        var componentDOMRepresentation = ReactDOM.findDOMNode(this);
+	        window.snapterest.headerHtml = componentDOMRepresentation.children[0].outerHTML;
+	        window.snapterest.tweetHTML  = componentDOMRepresentation.children[1].outerHTML;
+	    },
+	
+	    /**
+	     * 컴포넌트 업데이트 생명주기
+	     */
+	
+	    // 1. 이 메소드가 컴포넌트 생명주기의 업데이트 단계에서 가장 먼저 실행되며, 부모 컴포넌트로부터 새로운 프로퍼티를 받을대 호출 된다.
+	    componentWillReceiveProps : function (nextProps) {
+	        //console.log('4. componentWillReceiveProps()');
+	        var currentTweetLength = this.props.tweet.text.length;
+	        var nextTweetLength = nextProps.tweet.text.length;
+	        var isNumberOfCharactersincreasing = (nextTweetLength > currentTweetLength);
+	        var headerText;
+	
+	        this.setState({
+	            numberOfCharactersIsIncreasing: isNumberOfCharactersincreasing,
+	            tweetText : nextProps.tweet.text,
+	            tweetKeyword : nextProps.tweet.keyword
+	        });
+	
+	        if (isNumberOfCharactersincreasing) {
+	            headerText = '글자수가 늘어나고 있음('+currentTweetLength + ' >> ' + nextTweetLength+')';
+	        } else {
+	            headerText = '최근 공개 사진';
+	        }
+	
+	        this.setState({
+	            headerText : headerText
+	        });
+	
+	        window.snapterest.numberOfReceivedTweets++;
+	    },
+	
+	    // 2. 컴포넌ㅌ의 다음 상태로 컨포넌트의 재렌더링 여부를 결정할 수 있다.
+	    shouldComponentUpdate : function(nextProps, nextState) {
+	        //console.log('5. shouldComponentUpdate()');
+	        return (nextProps.tweet.text.length > 1);
+	
+	    },
+	
+	    // 컴포넌트가 돔을 업데이트하기 바로 직전에 호출된다.
+	    // 메소드가 호출되고 나서, React는 Dom 업데이트를 수행하기 위해 render() 메소드를 실행한다. 이어서 componentDidUpdate() 메소드가 호출된다.
+	    componentWillUpdate : function(nextProps, nextState) {
+	        //console.log('6. componentWillUpdate()');
+	    },
+	
+	    // React에서 DOM을 업데이트하자마자 호출된다. 업데이트된 DOM과 상호작용하거나 렌더링 이후에 명령들을 수행할 수 있다.
+	    componentDidUpdate : function(prevProps, prevState) {
+	        //console.log('7. componentDidUpdate()');
+	        window.snapterest.numberOfReceivedTweets++;
+	    },
+	
+	    componentWillUnmount : function() {
+	        //console.log('8. componentWillUnmount()');
+	        delete window.snapterest;
+	    },
+	
+	    addTweetToCollection : function(tweet) {
+	        CollectionActionCreators.addTweetToCollection(tweet);
+	    },
+	
+	    render : function() {
+	        var keyword = this.state.tweetKeyword || '';
+	        var text = this.state.tweetText || '';
+	        //var tweetText = text.replace(new RegExp('('+keyword+')', 'ig'), `{<b>}$1{</b>}`);
+	        return (
+	            React.createElement("section", null, 
+	                React.createElement(Header, {text: this.state.headerText}), 
+	                React.createElement("p", null, ":: ", React.createElement("b", null, keyword), " :: ", text), 
+	                React.createElement(Tweet, {tweet: this.props.tweet, onImageClick: this.addTweetToCollection})
+	            )
+	        );
+	    }
+	
+	})
+	
+	module.exports = StreamTweet;
+
+
+/***/ },
+/* 171 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	
+	var headerStyle = {
+	    fontSize : '16px',
+	    fontWeight : '300',
+	    display : 'block',
+	    margin : '20px 10px'
+	};
+	
+	var Header = React.createClass({displayName: "Header",
+	    getDefaultProps : function() {
+	        return {
+	            text : 'Default Header'
+	        };
+	    },
+	    render : function() {
+	        return (
+	            React.createElement("h2", {style: headerStyle}, this.props.text)
+	        );
+	    }
+	});
+	
+	module.exports = Header;
+
+
+/***/ },
+/* 172 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	
+	var tweetStyle = {
+	  position: 'relative',
+	  display: 'inline-block',
+	  width: '300px',
+	  height: '400px',
+	  margin: '10px'
+	};
+	
+	var imageStyle = {
+	  maxHeight: '400px',
+	  boxShadow: '0px 1px 1px 0px #aaa',
+	  border: '1px solid #fff'
+	};
+	
+	var Tweet = React.createClass({displayName: "Tweet",
+	
+	  propTypes: {
+	    tweet: function(properties, propertyName, componentName) {
+	      var tweet = properties[propertyName];
+	
+	      if (! tweet) {
+	        return new Error('Tweet must be set.');
+	      }
+	
+	      if (! tweet.media) {
+	        return new Error('Tweet must have an image.');
+	      }
+	    },
+	    onImageClick: React.PropTypes.func
+	  },
+	
+	  handleImageClick: function () {
+	    var tweet = this.props.tweet;
+	    var onImageClick = this.props.onImageClick;
+	
+	    if (onImageClick) {
+	      onImageClick(tweet);
+	    }
+	  },
+	
+	  render: function () {
+	    var tweet = this.props.tweet;
+	    var tweetMediaUrl = tweet.media[0].url;
+	
+	    return (
+	      React.createElement("div", {style: tweetStyle}, 
+	        React.createElement("img", {src: tweetMediaUrl, onClick: this.handleImageClick, style: imageStyle})
+	      )
+	    );
+	  }
+	});
+	
+	module.exports = Tweet;
+
+/***/ },
+/* 173 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var AppDispatcher = __webpack_require__(174);
+	
+	module.exports = {
+	    addTweetToCollection : function(tweet) {
+	        var action = {
+	            type : 'add_tweet_to_collection',
+	            tweet : tweet
+	        };
+	
+	        AppDispatcher.dispatch(action);
+	    },
+	
+	    removeTweetFromCollection : function(tweetId) {
+	        var action = {
+	            type : 'remove_tweet_from_collection',
+	            tweetId : tweetId
+	        }
+	
+	        AppDispatcher.dispatch(action);
+	    },
+	
+	    removeAllTweetsFromCollection : function() {
+	        var action = {
+	            type : 'remove_all_tweets_from_collection'
+	        }
+	
+	        AppDispatcher.dispatch(action);
+	    },
+	
+	    setCollectionName : function(collectionName) {
+	        var action = {
+	            type : 'set_collection_name',
+	            collectionName : collectionName
+	        }
+	
+	        AppDispatcher.dispatch(action);
+	    }
+	
+	
+	};
+
+
+/***/ },
+/* 174 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var dispatcher = __webpack_require__(175).Dispatcher;
+	module.exports = new dispatcher();
+
+
+/***/ },
+/* 175 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright (c) 2014-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 */
+	
+	module.exports.Dispatcher = __webpack_require__(176);
+
+
+/***/ },
+/* 176 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright (c) 2014-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule Dispatcher
+	 * 
+	 * @preventMunge
+	 */
+	
+	'use strict';
+	
+	exports.__esModule = true;
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	
+	var invariant = __webpack_require__(177);
+	
+	var _prefix = 'ID_';
+	
+	/**
+	 * Dispatcher is used to broadcast payloads to registered callbacks. This is
+	 * different from generic pub-sub systems in two ways:
+	 *
+	 *   1) Callbacks are not subscribed to particular events. Every payload is
+	 *      dispatched to every registered callback.
+	 *   2) Callbacks can be deferred in whole or part until other callbacks have
+	 *      been executed.
+	 *
+	 * For example, consider this hypothetical flight destination form, which
+	 * selects a default city when a country is selected:
+	 *
+	 *   var flightDispatcher = new Dispatcher();
+	 *
+	 *   // Keeps track of which country is selected
+	 *   var CountryStore = {country: null};
+	 *
+	 *   // Keeps track of which city is selected
+	 *   var CityStore = {city: null};
+	 *
+	 *   // Keeps track of the base flight price of the selected city
+	 *   var FlightPriceStore = {price: null}
+	 *
+	 * When a user changes the selected city, we dispatch the payload:
+	 *
+	 *   flightDispatcher.dispatch({
+	 *     actionType: 'city-update',
+	 *     selectedCity: 'paris'
+	 *   });
+	 *
+	 * This payload is digested by `CityStore`:
+	 *
+	 *   flightDispatcher.register(function(payload) {
+	 *     if (payload.actionType === 'city-update') {
+	 *       CityStore.city = payload.selectedCity;
+	 *     }
+	 *   });
+	 *
+	 * When the user selects a country, we dispatch the payload:
+	 *
+	 *   flightDispatcher.dispatch({
+	 *     actionType: 'country-update',
+	 *     selectedCountry: 'australia'
+	 *   });
+	 *
+	 * This payload is digested by both stores:
+	 *
+	 *   CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
+	 *     if (payload.actionType === 'country-update') {
+	 *       CountryStore.country = payload.selectedCountry;
+	 *     }
+	 *   });
+	 *
+	 * When the callback to update `CountryStore` is registered, we save a reference
+	 * to the returned token. Using this token with `waitFor()`, we can guarantee
+	 * that `CountryStore` is updated before the callback that updates `CityStore`
+	 * needs to query its data.
+	 *
+	 *   CityStore.dispatchToken = flightDispatcher.register(function(payload) {
+	 *     if (payload.actionType === 'country-update') {
+	 *       // `CountryStore.country` may not be updated.
+	 *       flightDispatcher.waitFor([CountryStore.dispatchToken]);
+	 *       // `CountryStore.country` is now guaranteed to be updated.
+	 *
+	 *       // Select the default city for the new country
+	 *       CityStore.city = getDefaultCityForCountry(CountryStore.country);
+	 *     }
+	 *   });
+	 *
+	 * The usage of `waitFor()` can be chained, for example:
+	 *
+	 *   FlightPriceStore.dispatchToken =
+	 *     flightDispatcher.register(function(payload) {
+	 *       switch (payload.actionType) {
+	 *         case 'country-update':
+	 *         case 'city-update':
+	 *           flightDispatcher.waitFor([CityStore.dispatchToken]);
+	 *           FlightPriceStore.price =
+	 *             getFlightPriceStore(CountryStore.country, CityStore.city);
+	 *           break;
+	 *     }
+	 *   });
+	 *
+	 * The `country-update` payload will be guaranteed to invoke the stores'
+	 * registered callbacks in order: `CountryStore`, `CityStore`, then
+	 * `FlightPriceStore`.
+	 */
+	
+	var Dispatcher = (function () {
+	  function Dispatcher() {
+	    _classCallCheck(this, Dispatcher);
+	
+	    this._callbacks = {};
+	    this._isDispatching = false;
+	    this._isHandled = {};
+	    this._isPending = {};
+	    this._lastID = 1;
+	  }
+	
+	  /**
+	   * Registers a callback to be invoked with every dispatched payload. Returns
+	   * a token that can be used with `waitFor()`.
+	   */
+	
+	  Dispatcher.prototype.register = function register(callback) {
+	    var id = _prefix + this._lastID++;
+	    this._callbacks[id] = callback;
+	    return id;
+	  };
+	
+	  /**
+	   * Removes a callback based on its token.
+	   */
+	
+	  Dispatcher.prototype.unregister = function unregister(id) {
+	    !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+	    delete this._callbacks[id];
+	  };
+	
+	  /**
+	   * Waits for the callbacks specified to be invoked before continuing execution
+	   * of the current callback. This method should only be used by a callback in
+	   * response to a dispatched payload.
+	   */
+	
+	  Dispatcher.prototype.waitFor = function waitFor(ids) {
+	    !this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Must be invoked while dispatching.') : invariant(false) : undefined;
+	    for (var ii = 0; ii < ids.length; ii++) {
+	      var id = ids[ii];
+	      if (this._isPending[id]) {
+	        !this._isHandled[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id) : invariant(false) : undefined;
+	        continue;
+	      }
+	      !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+	      this._invokeCallback(id);
+	    }
+	  };
+	
+	  /**
+	   * Dispatches a payload to all registered callbacks.
+	   */
+	
+	  Dispatcher.prototype.dispatch = function dispatch(payload) {
+	    !!this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.') : invariant(false) : undefined;
+	    this._startDispatching(payload);
+	    try {
+	      for (var id in this._callbacks) {
+	        if (this._isPending[id]) {
+	          continue;
+	        }
+	        this._invokeCallback(id);
+	      }
+	    } finally {
+	      this._stopDispatching();
+	    }
+	  };
+	
+	  /**
+	   * Is this Dispatcher currently dispatching.
+	   */
+	
+	  Dispatcher.prototype.isDispatching = function isDispatching() {
+	    return this._isDispatching;
+	  };
+	
+	  /**
+	   * Call the callback stored with the given id. Also do some internal
+	   * bookkeeping.
+	   *
+	   * @internal
+	   */
+	
+	  Dispatcher.prototype._invokeCallback = function _invokeCallback(id) {
+	    this._isPending[id] = true;
+	    this._callbacks[id](this._pendingPayload);
+	    this._isHandled[id] = true;
+	  };
+	
+	  /**
+	   * Set up bookkeeping needed when dispatching.
+	   *
+	   * @internal
+	   */
+	
+	  Dispatcher.prototype._startDispatching = function _startDispatching(payload) {
+	    for (var id in this._callbacks) {
+	      this._isPending[id] = false;
+	      this._isHandled[id] = false;
+	    }
+	    this._pendingPayload = payload;
+	    this._isDispatching = true;
+	  };
+	
+	  /**
+	   * Clear bookkeeping used for dispatching.
+	   *
+	   * @internal
+	   */
+	
+	  Dispatcher.prototype._stopDispatching = function _stopDispatching() {
+	    delete this._pendingPayload;
+	    this._isDispatching = false;
+	  };
+	
+	  return Dispatcher;
+	})();
+	
+	module.exports = Dispatcher;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+
+/***/ },
+/* 177 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule invariant
+	 */
+	
+	"use strict";
+	
+	/**
+	 * Use invariant() to assert state which your program assumes to be true.
+	 *
+	 * Provide sprintf-style format (only %s is supported) and arguments
+	 * to provide information about what broke and what you were
+	 * expecting.
+	 *
+	 * The invariant message will be stripped in production, but the invariant
+	 * will remain to ensure logic does not differ in production.
+	 */
+	
+	var invariant = function (condition, format, a, b, c, d, e, f) {
+	  if (process.env.NODE_ENV !== 'production') {
+	    if (format === undefined) {
+	      throw new Error('invariant requires an error message argument');
+	    }
+	  }
+	
+	  if (!condition) {
+	    var error;
+	    if (format === undefined) {
+	      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+	    } else {
+	      var args = [a, b, c, d, e, f];
+	      var argIndex = 0;
+	      error = new Error('Invariant Violation: ' + format.replace(/%s/g, function () {
+	        return args[argIndex++];
+	      }));
+	    }
+	
+	    error.framesToPop = 1; // we don't care about invariant's own frame
+	    throw error;
+	  }
+	};
+	
+	module.exports = invariant;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+
+/***/ },
+/* 178 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var AppDispatcher = __webpack_require__(174);
+	var EventEmitter = __webpack_require__(179).EventEmitter;
+	var assign = __webpack_require__(180);
+	var tweet = null;
+	
+	function setTweet(receivedTweet) {
+	    tweet = receivedTweet;
+	}
+	
+	function emitChange() {
+	    TweetStore.emit('change');
+	}
+	
+	var TweetStore = assign({}, EventEmitter.prototype, {
+	    addChangeListener : function (callback) {
+	        this.on('change', callback);
+	    },
+	    removeChangeListener : function(callback) {
+	        this.removeListener('change', callback);
+	    },
+	    getTweet : function() {
+	        return tweet;
+	    }
+	});
+	
+	function handleAction(action) {
+	    if ( action.type === 'receive_tweet' ) {
+	        setTweet(action.tweet);
+	        emitChange();
+	    }
+	}
+	
+	TweetStore.dispatchToken = AppDispatcher.register(handleAction);
+	module.exports = TweetStore;
+
+
+/***/ },
+/* 179 */
+/***/ function(module, exports) {
+
+	// Copyright Joyent, Inc. and other Node contributors.
+	//
+	// Permission is hereby granted, free of charge, to any person obtaining a
+	// copy of this software and associated documentation files (the
+	// "Software"), to deal in the Software without restriction, including
+	// without limitation the rights to use, copy, modify, merge, publish,
+	// distribute, sublicense, and/or sell copies of the Software, and to permit
+	// persons to whom the Software is furnished to do so, subject to the
+	// following conditions:
+	//
+	// The above copyright notice and this permission notice shall be included
+	// in all copies or substantial portions of the Software.
+	//
+	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+	// USE OR OTHER DEALINGS IN THE SOFTWARE.
+	
+	function EventEmitter() {
+	  this._events = this._events || {};
+	  this._maxListeners = this._maxListeners || undefined;
+	}
+	module.exports = EventEmitter;
+	
+	// Backwards-compat with node 0.10.x
+	EventEmitter.EventEmitter = EventEmitter;
+	
+	EventEmitter.prototype._events = undefined;
+	EventEmitter.prototype._maxListeners = undefined;
+	
+	// By default EventEmitters will print a warning if more than 10 listeners are
+	// added to it. This is a useful default which helps finding memory leaks.
+	EventEmitter.defaultMaxListeners = 10;
+	
+	// Obviously not all Emitters should be limited to 10. This function allows
+	// that to be increased. Set to zero for unlimited.
+	EventEmitter.prototype.setMaxListeners = function(n) {
+	  if (!isNumber(n) || n < 0 || isNaN(n))
+	    throw TypeError('n must be a positive number');
+	  this._maxListeners = n;
+	  return this;
+	};
+	
+	EventEmitter.prototype.emit = function(type) {
+	  var er, handler, len, args, i, listeners;
+	
+	  if (!this._events)
+	    this._events = {};
+	
+	  // If there is no 'error' event listener then throw.
+	  if (type === 'error') {
+	    if (!this._events.error ||
+	        (isObject(this._events.error) && !this._events.error.length)) {
+	      er = arguments[1];
+	      if (er instanceof Error) {
+	        throw er; // Unhandled 'error' event
+	      }
+	      throw TypeError('Uncaught, unspecified "error" event.');
+	    }
+	  }
+	
+	  handler = this._events[type];
+	
+	  if (isUndefined(handler))
+	    return false;
+	
+	  if (isFunction(handler)) {
+	    switch (arguments.length) {
+	      // fast cases
+	      case 1:
+	        handler.call(this);
+	        break;
+	      case 2:
+	        handler.call(this, arguments[1]);
+	        break;
+	      case 3:
+	        handler.call(this, arguments[1], arguments[2]);
+	        break;
+	      // slower
+	      default:
+	        args = Array.prototype.slice.call(arguments, 1);
+	        handler.apply(this, args);
+	    }
+	  } else if (isObject(handler)) {
+	    args = Array.prototype.slice.call(arguments, 1);
+	    listeners = handler.slice();
+	    len = listeners.length;
+	    for (i = 0; i < len; i++)
+	      listeners[i].apply(this, args);
+	  }
+	
+	  return true;
+	};
+	
+	EventEmitter.prototype.addListener = function(type, listener) {
+	  var m;
+	
+	  if (!isFunction(listener))
+	    throw TypeError('listener must be a function');
+	
+	  if (!this._events)
+	    this._events = {};
+	
+	  // To avoid recursion in the case that type === "newListener"! Before
+	  // adding it to the listeners, first emit "newListener".
+	  if (this._events.newListener)
+	    this.emit('newListener', type,
+	              isFunction(listener.listener) ?
+	              listener.listener : listener);
+	
+	  if (!this._events[type])
+	    // Optimize the case of one listener. Don't need the extra array object.
+	    this._events[type] = listener;
+	  else if (isObject(this._events[type]))
+	    // If we've already got an array, just append.
+	    this._events[type].push(listener);
+	  else
+	    // Adding the second element, need to change to array.
+	    this._events[type] = [this._events[type], listener];
+	
+	  // Check for listener leak
+	  if (isObject(this._events[type]) && !this._events[type].warned) {
+	    if (!isUndefined(this._maxListeners)) {
+	      m = this._maxListeners;
+	    } else {
+	      m = EventEmitter.defaultMaxListeners;
+	    }
+	
+	    if (m && m > 0 && this._events[type].length > m) {
+	      this._events[type].warned = true;
+	      console.error('(node) warning: possible EventEmitter memory ' +
+	                    'leak detected. %d listeners added. ' +
+	                    'Use emitter.setMaxListeners() to increase limit.',
+	                    this._events[type].length);
+	      if (typeof console.trace === 'function') {
+	        // not supported in IE 10
+	        console.trace();
+	      }
+	    }
+	  }
+	
+	  return this;
+	};
+	
+	EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+	
+	EventEmitter.prototype.once = function(type, listener) {
+	  if (!isFunction(listener))
+	    throw TypeError('listener must be a function');
+	
+	  var fired = false;
+	
+	  function g() {
+	    this.removeListener(type, g);
+	
+	    if (!fired) {
+	      fired = true;
+	      listener.apply(this, arguments);
+	    }
+	  }
+	
+	  g.listener = listener;
+	  this.on(type, g);
+	
+	  return this;
+	};
+	
+	// emits a 'removeListener' event iff the listener was removed
+	EventEmitter.prototype.removeListener = function(type, listener) {
+	  var list, position, length, i;
+	
+	  if (!isFunction(listener))
+	    throw TypeError('listener must be a function');
+	
+	  if (!this._events || !this._events[type])
+	    return this;
+	
+	  list = this._events[type];
+	  length = list.length;
+	  position = -1;
+	
+	  if (list === listener ||
+	      (isFunction(list.listener) && list.listener === listener)) {
+	    delete this._events[type];
+	    if (this._events.removeListener)
+	      this.emit('removeListener', type, listener);
+	
+	  } else if (isObject(list)) {
+	    for (i = length; i-- > 0;) {
+	      if (list[i] === listener ||
+	          (list[i].listener && list[i].listener === listener)) {
+	        position = i;
+	        break;
+	      }
+	    }
+	
+	    if (position < 0)
+	      return this;
+	
+	    if (list.length === 1) {
+	      list.length = 0;
+	      delete this._events[type];
+	    } else {
+	      list.splice(position, 1);
+	    }
+	
+	    if (this._events.removeListener)
+	      this.emit('removeListener', type, listener);
+	  }
+	
+	  return this;
+	};
+	
+	EventEmitter.prototype.removeAllListeners = function(type) {
+	  var key, listeners;
+	
+	  if (!this._events)
+	    return this;
+	
+	  // not listening for removeListener, no need to emit
+	  if (!this._events.removeListener) {
+	    if (arguments.length === 0)
+	      this._events = {};
+	    else if (this._events[type])
+	      delete this._events[type];
+	    return this;
+	  }
+	
+	  // emit removeListener for all listeners on all events
+	  if (arguments.length === 0) {
+	    for (key in this._events) {
+	      if (key === 'removeListener') continue;
+	      this.removeAllListeners(key);
+	    }
+	    this.removeAllListeners('removeListener');
+	    this._events = {};
+	    return this;
+	  }
+	
+	  listeners = this._events[type];
+	
+	  if (isFunction(listeners)) {
+	    this.removeListener(type, listeners);
+	  } else if (listeners) {
+	    // LIFO order
+	    while (listeners.length)
+	      this.removeListener(type, listeners[listeners.length - 1]);
+	  }
+	  delete this._events[type];
+	
+	  return this;
+	};
+	
+	EventEmitter.prototype.listeners = function(type) {
+	  var ret;
+	  if (!this._events || !this._events[type])
+	    ret = [];
+	  else if (isFunction(this._events[type]))
+	    ret = [this._events[type]];
+	  else
+	    ret = this._events[type].slice();
+	  return ret;
+	};
+	
+	EventEmitter.prototype.listenerCount = function(type) {
+	  if (this._events) {
+	    var evlistener = this._events[type];
+	
+	    if (isFunction(evlistener))
+	      return 1;
+	    else if (evlistener)
+	      return evlistener.length;
+	  }
+	  return 0;
+	};
+	
+	EventEmitter.listenerCount = function(emitter, type) {
+	  return emitter.listenerCount(type);
+	};
+	
+	function isFunction(arg) {
+	  return typeof arg === 'function';
+	}
+	
+	function isNumber(arg) {
+	  return typeof arg === 'number';
+	}
+	
+	function isObject(arg) {
+	  return typeof arg === 'object' && arg !== null;
+	}
+	
+	function isUndefined(arg) {
+	  return arg === void 0;
+	}
+
+
+/***/ },
+/* 180 */
+/***/ function(module, exports) {
+
+	'use strict';
+	/* eslint-disable no-unused-vars */
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+	var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+	
+	function toObject(val) {
+		if (val === null || val === undefined) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+	
+		return Object(val);
+	}
+	
+	function shouldUseNative() {
+		try {
+			if (!Object.assign) {
+				return false;
+			}
+	
+			// Detect buggy property enumeration order in older V8 versions.
+	
+			// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+			var test1 = new String('abc');  // eslint-disable-line
+			test1[5] = 'de';
+			if (Object.getOwnPropertyNames(test1)[0] === '5') {
+				return false;
+			}
+	
+			// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+			var test2 = {};
+			for (var i = 0; i < 10; i++) {
+				test2['_' + String.fromCharCode(i)] = i;
+			}
+			var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+				return test2[n];
+			});
+			if (order2.join('') !== '0123456789') {
+				return false;
+			}
+	
+			// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+			var test3 = {};
+			'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+				test3[letter] = letter;
+			});
+			if (Object.keys(Object.assign({}, test3)).join('') !==
+					'abcdefghijklmnopqrst') {
+				return false;
+			}
+	
+			return true;
+		} catch (e) {
+			// We don't expect any of the above to throw, but better to be safe.
+			return false;
+		}
+	}
+	
+	module.exports = shouldUseNative() ? Object.assign : function (target, source) {
+		var from;
+		var to = toObject(target);
+		var symbols;
+	
+		for (var s = 1; s < arguments.length; s++) {
+			from = Object(arguments[s]);
+	
+			for (var key in from) {
+				if (hasOwnProperty.call(from, key)) {
+					to[key] = from[key];
+				}
+			}
+	
+			if (Object.getOwnPropertySymbols) {
+				symbols = Object.getOwnPropertySymbols(from);
+				for (var i = 0; i < symbols.length; i++) {
+					if (propIsEnumerable.call(from, symbols[i])) {
+						to[symbols[i]] = from[symbols[i]];
+					}
+				}
+			}
+		}
+	
+		return to;
+	};
+
+
+/***/ },
+/* 181 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	var ReactDOMServer = __webpack_require__(182);
+	var CollectionControls = __webpack_require__(186);
+	var TweetList = __webpack_require__(191);
+	var Header = __webpack_require__(171);
+	var CollectionUtils = __webpack_require__(192);
+	var CollectionStore = __webpack_require__(189);
+	
+	var Collection = React.createClass({displayName: "Collection",
+	
+	    getInitialState : function() {
+	        return {
+	            collectionTweets : CollectionStore.getCollectionTweets()
+	        }
+	    },
+	
+	    componentDidMount : function() {
+	        CollectionStore.addChangeListener(this.onCollectionChange);
+	    },
+	
+	    componentWillUnmount : function() {
+	        CollectionStroe.removeChangeListener(this.onCollectionChange);
+	    },
+	
+	    onCollectionChange : function() {
+	        this.setState({
+	            collectionTweets : CollectionStore.getCollectionTweets()
+	        });
+	    },
+	
+	    createHtmlMarkupStringOfTweetList : function() {
+	        var htmlString = ReactDOMServer.renderToStaticMarkup(
+	            React.createElement(TweetList, {tweets: this.state.collectionTweets})
+	        );
+	
+	        var htmlMarkup = {
+	            html : htmlString
+	        };
+	        return JSON.stringify(htmlMarkup);
+	    },
+	
+	    render : function() {
+	        var collectionTweets = this.state.collectionTweets;
+	        var numberOfTweetsInCollection = CollectionUtils.getNumberOfTweetsInCollection(collectionTweets);
+	        var htmlMarkup;
+	
+	        if ( numberOfTweetsInCollection > 0 ) {
+	            htmlMarkup = this.createHtmlMarkupStringOfTweetList();
+	            return (
+	                React.createElement("div", null, 
+	                    React.createElement(CollectionControls, {
+	                        numberOfTweetsInCollection: numberOfTweetsInCollection, 
+	                        htmlMarkup: htmlMarkup}), 
+	                    React.createElement(TweetList, {tweets: collectionTweets})
+	                )
+	            )
+	        }
+	        return  React.createElement(Header, {text: "컬렉션이 비어 있음(collection.js)"})
+	    }
+	
+	})
+	
+	module.exports = Collection;
+
+
+/***/ },
+/* 182 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	module.exports = __webpack_require__(183);
+
+
+/***/ },
+/* 183 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2013-present, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule ReactDOMServer
+	 */
+	
+	'use strict';
+	
+	var ReactDefaultInjection = __webpack_require__(43);
+	var ReactServerRendering = __webpack_require__(184);
+	var ReactVersion = __webpack_require__(36);
+	
+	ReactDefaultInjection.inject();
+	
+	var ReactDOMServer = {
+	  renderToString: ReactServerRendering.renderToString,
+	  renderToStaticMarkup: ReactServerRendering.renderToStaticMarkup,
+	  version: ReactVersion
+	};
+	
+	module.exports = ReactDOMServer;
+
+/***/ },
+/* 184 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright 2013-present, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule ReactServerRendering
+	 */
+	'use strict';
+	
+	var ReactDOMContainerInfo = __webpack_require__(161);
+	var ReactDefaultBatchingStrategy = __webpack_require__(134);
+	var ReactElement = __webpack_require__(8);
+	var ReactInstrumentation = __webpack_require__(18);
+	var ReactMarkupChecksum = __webpack_require__(163);
+	var ReactReconciler = __webpack_require__(62);
+	var ReactServerBatchingStrategy = __webpack_require__(185);
+	var ReactServerRenderingTransaction = __webpack_require__(128);
+	var ReactUpdates = __webpack_require__(59);
+	
+	var emptyObject = __webpack_require__(26);
+	var instantiateReactComponent = __webpack_require__(119);
+	var invariant = __webpack_require__(7);
+	
+	/**
+	 * @param {ReactElement} element
+	 * @return {string} the HTML markup
+	 */
+	function renderToStringImpl(element, makeStaticMarkup) {
+	  var transaction;
+	  try {
+	    ReactUpdates.injection.injectBatchingStrategy(ReactServerBatchingStrategy);
+	
+	    transaction = ReactServerRenderingTransaction.getPooled(makeStaticMarkup);
+	
+	    return transaction.perform(function () {
+	      if (process.env.NODE_ENV !== 'production') {
+	        ReactInstrumentation.debugTool.onBeginFlush();
+	      }
+	      var componentInstance = instantiateReactComponent(element);
+	      var markup = ReactReconciler.mountComponent(componentInstance, transaction, null, ReactDOMContainerInfo(), emptyObject);
+	      if (process.env.NODE_ENV !== 'production') {
+	        ReactInstrumentation.debugTool.onUnmountComponent(componentInstance._debugID);
+	        ReactInstrumentation.debugTool.onEndFlush();
+	      }
+	      if (!makeStaticMarkup) {
+	        markup = ReactMarkupChecksum.addChecksumToMarkup(markup);
+	      }
+	      return markup;
+	    }, null);
+	  } finally {
+	    ReactServerRenderingTransaction.release(transaction);
+	    // Revert to the DOM batching strategy since these two renderers
+	    // currently share these stateful modules.
+	    ReactUpdates.injection.injectBatchingStrategy(ReactDefaultBatchingStrategy);
+	  }
+	}
+	
+	/**
+	 * Render a ReactElement to its initial HTML. This should only be used on the
+	 * server.
+	 * See https://facebook.github.io/react/docs/top-level-api.html#reactdomserver.rendertostring
+	 */
+	function renderToString(element) {
+	  !ReactElement.isValidElement(element) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'renderToString(): You must pass a valid ReactElement.') : invariant(false) : void 0;
+	  return renderToStringImpl(element, false);
+	}
+	
+	/**
+	 * Similar to renderToString, except this doesn't create extra DOM attributes
+	 * such as data-react-id that React uses internally.
+	 * See https://facebook.github.io/react/docs/top-level-api.html#reactdomserver.rendertostaticmarkup
+	 */
+	function renderToStaticMarkup(element) {
+	  !ReactElement.isValidElement(element) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'renderToStaticMarkup(): You must pass a valid ReactElement.') : invariant(false) : void 0;
+	  return renderToStringImpl(element, true);
+	}
+	
+	module.exports = {
+	  renderToString: renderToString,
+	  renderToStaticMarkup: renderToStaticMarkup
+	};
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+
+/***/ },
+/* 185 */
+/***/ function(module, exports) {
+
+	/**
+	 * Copyright 2014-present, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule ReactServerBatchingStrategy
+	 */
+	
+	'use strict';
+	
+	var ReactServerBatchingStrategy = {
+	  isBatchingUpdates: false,
+	  batchedUpdates: function (callback) {
+	    // Don't do anything here. During the server rendering we don't want to
+	    // schedule any updates. We will simply ignore them.
+	  }
+	};
+	
+	module.exports = ReactServerBatchingStrategy;
+
+/***/ },
+/* 186 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	var Header = __webpack_require__(171);
+	var Button = __webpack_require__(187);
+	var CollectionRenameForm = __webpack_require__(188);
+	var CollectionExportForm = __webpack_require__(190);
+	var CollectionActionCreators = __webpack_require__(173);
+	var CollectionStore = __webpack_require__(189);
+	
+	var CollectionControls = React.createClass({displayName: "CollectionControls",
+	    getInitialState : function() {
+	        return {
+	            isEditingName : false
+	        };
+	    },
+	
+	    getHeaderText : function() {
+	        var numberOfTweetsInCollection = this.props.numberOfTweetsInCollection;
+	        var text = '';
+	        var name = CollectionStore.getCollectionName();
+	
+	        if (numberOfTweetsInCollection === 1) {
+	            text = text + ' tweet in your';
+	        } else {
+	            text = text + ' tweets in your';
+	        }
+	
+	        return (
+	            React.createElement("span", null, 
+	                text, " ", React.createElement("strong", null, name), " collection"
+	            )
+	        );
+	    },
+	
+	    toggleEditCollectionName : function() {
+	        this.setState({
+	            isEditingName : !this.state.isEditingName
+	        });
+	    },
+	
+	    removeAllTweetsFromCollection : function() {
+	        CollectionActionCreators.removeAllTweetsFromCollection();
+	    },
+	
+	    render : function() {
+	        if (this.state.isEditingName) {
+	            return (
+	                React.createElement(CollectionRenameForm, {onCancelCollectionNameChange: this.toggleEditCollectionName})
+	            );
+	        }
+	
+	        return (
+	            React.createElement("div", null, 
+	                React.createElement(Header, {text: this.getHeaderText()}), 
+	                React.createElement(Button, {label: "이름 변경", handleClick: this.toggleEditCollectionName}), 
+	                React.createElement(Button, {label: "컬렉션 모두 삭제", handleClick: this.removeAllTweetsFromCollection}), 
+	                React.createElement(CollectionExportForm, {htmlMarkup: this.props.htmlMarkup})
+	            )
+	        );
+	    }
+	});
+	
+	module.exports = CollectionControls;
+
+
+/***/ },
+/* 187 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	
+	var buttonStyle = {
+	    margin: '10px 10px 10px 0'
+	};
+	
+	var Button = React.createClass({displayName: "Button",
+	    render : function() {
+	        return React.createElement("button", {className: "btn-btn-default", style: buttonStyle, 
+	            onClick: this.props.handleClick}, this.props.label)
+	    }
+	});
+	
+	module.exports = Button;
+
+
+/***/ },
+/* 188 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(38);
+	var Header = __webpack_require__(171);
+	var Button = __webpack_require__(187);
+	var CollectionActionCreators = __webpack_require__(173);
+	var CollectionStore = __webpack_require__(189);
+	
+	var inputStyle = {
+	    marginRight : '5px'
+	}
+	
+	var CollectionRenameForm = React.createClass({displayName: "CollectionRenameForm",
+	    getInitialState: function() {
+	        return {
+	            inputValue : CollectionStore.getCollectionName()
+	        };
+	    },
+	
+	    setInputValue : function(inputValue) {
+	        this.setState({
+	            inputValue : inputValue
+	        });
+	    },
+	
+	    handleInputValueChange : function( event ) {
+	        var inputValue = event.target.value;
+	        this.setInputValue(inputValue);
+	    },
+	
+	    handleFormSubmit : function(event) {
+	        console.log('handleFormSubmit');
+	        event.preventDefault();
+	        var collectionName = this.state.inputValue;
+	        CollectionActionCreators.setCollectionName(collectionName);
+	        this.props.onCancelCollectionNameChange();
+	        // this.props.onChangeCollectionName(collectionName);
+	    },
+	
+	    handleFormCancel : function(event) {
+	        console.log('handleFormCancel');
+	        event.preventDefault();
+	        // var collectionname = this.props.name;
+	        var collectionName = ColletionStore.getCollectionName();
+	        this.setInputValue(collectionName);
+	        this.props.onCancelCollectionNameChange();
+	
+	    },
+	
+	    componentDidMount : function() {
+	        this.refs.collectionName.focus();
+	    },
+	
+	    render: function() {
+	        // ref : render() 메소드에 의해 반환되는 컴포넌트에 적용될 수 있는 특별한 용도의 React 프로퍼티다.
+	        //       외부의 컴포넌트에서 refs.collectionName 형식으로 참조할 수 있다.
+	        return (
+	            React.createElement("form", {className: "form-inline", onSubmit: this.handleFormSubmit}, 
+	                React.createElement(Header, {Text: "컬렉션 이름 : "}), 
+	                React.createElement("div", {className: "form-group"}, 
+	                    React.createElement("input", {classNamme: "form-control", 
+	                        style: inputStyle, 
+	                        onChange: this.handleInputValueChange, 
+	                        value: this.state.inputValue, 
+	                        ref: "collectionName"})
+	                ), 
+	                React.createElement(Button, {label: "이름변경", handleclick: this.handleFormSubmit}), 
+	                React.createElement(Button, {label: "취소", handleclick: this.handleFormCancel})
+	            )
+	        );
+	    }
+	});
+	
+	module.exports = CollectionRenameForm;
+
+
+/***/ },
+/* 189 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var AppDispatcher = __webpack_require__(174);
+	var EventEmitter = __webpack_require__(179).EventEmitter;
+	var assign = __webpack_require__(180);
+	var CHANGE_EVENT = 'change';
+	var collectionTweets = {};
+	var collectionName = 'new';
+	
+	function addTweetToCollection(tweet) {
+	    collectionTweets[tweet.id] = tweet;
+	}
+	
+	function removeTweetFromCollection(tweetId) {
+	    delete collectionTweets[tweetId];
+	}
+	
+	function removeAllTweetsFromCollection() {
+	    collectionTweets = {}
+	}
+	
+	function setCollectionname(name) {
+	    collectionName = name;
+	}
+	
+	function emitChange() {
+	    CollectionStore.emit(CHANGE_EVENT);
+	}
+	
+	var CollectionStore = assign({}, EventEmitter.prototype, {
+	    addChangeListener : function(callback) {
+	        this.on(CHANGE_EVENT, callback);
+	    },
+	
+	    removeChangeListener : function(callback) {
+	        this.removeListener(CHANGE_EVENT, callback);
+	    },
+	
+	    getCollectionTweets : function() {
+	        return collectionTweets;
+	    },
+	
+	    getCollectionName : function() {
+	        return collectionName;
+	    }
+	});
+	
+	function handleAction(action) {
+	    switch (action.type) {
+	        case 'add_tweet_to_collection' :
+	            addTweetToCollection(action.tweet);
+	            emitChange();
+	            break;
+	        case 'remove_tweet_from_collection' :
+	            removeTweetFromCollection(action.tweetId);
+	            emitChange();
+	            break;
+	        case 'remove_all_tweets_from_collection' :
+	            removeAllTweetsFromCollection();
+	            emitChange();
+	            break;
+	        case 'set_collection_name' :
+	            setCollectionName(action.collectionName);
+	            emitChange();
+	            break;
+	
+	        default :
+	    }
+	}
+	
+	CollectionStore.dispatchToken = AppDispatcher.register(handleAction);
+	module.exports = CollectionStore;
+	
+
+
+/***/ },
+/* 190 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	
+	var formStyle={
+	    display:'inline-block'
+	};
+	
+	var CollectionExportForm = React.createClass({displayName: "CollectionExportForm",
+	    render : function() {
+	        return (
+	            React.createElement("form", {action: "http://codepen.io/pen/define", method: "post", target: "_black", style: formStyle}, 
+	                React.createElement("input", {type: "hidden", name: "data", value: this.props.htmlMarkup}), 
+	                React.createElement("button", {type: "submit", className: "btn btn-default"}, "Export as HTML")
+	            )
+	        );
+	    }
+	});
+	
+	module.exports = CollectionExportForm;
+
+
+/***/ },
+/* 191 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	var Tweet = __webpack_require__(172);
+	var CollectionActionCreators = __webpack_require__(173);
+	
+	var listStyle = {
+	    padding : 0
+	};
+	
+	var listItemStyle = {
+	    display:'inline-block',
+	    listStyle : 'none'
+	};
+	
+	var TweetList = React.createClass({displayName: "TweetList",
+	    getListOfTweetIds : function() {
+	        return Object.keys(this.props.tweets);
+	    },
+	
+	    removeTweetFromCollection : function(tweet) {
+	        CollectionActionCreators.removeTweetFromCollection(tweet.id);
+	    },
+	
+	    getTweetElement: function(tweetId) {
+	        var tweet = this.props.tweets[tweetId];
+	        var handleRemoveTweetFromcollection = this.removeTweetFromCollection;
+	        // var handleRemoveTweetFromcollection = this.props.onRemoveTweetFromCllection;
+	        var tweetElement;
+	
+	        if ( handleRemoveTweetFromcollection ) {
+	            tweetElement = (
+	                React.createElement(Tweet, {tweet: tweet, onImageClick: handleRemoveTweetFromcollection})
+	            );
+	        } else {
+	            tweetElement = (
+	                React.createElement(Tweet, {tweet: tweet})
+	            );
+	        }
+	
+	        return React.createElement("li", {style: listItemStyle, key: tweet.id}, tweetElement);
+	    },
+	
+	    render : function() {
+	        var tweetElements = this.getListOfTweetIds().reverse().map(this.getTweetElement);
+	        return (
+	            React.createElement("ul", {style: listStyle}, tweetElements)
+	        );
+	    }
+	
+	});
+	
+	module.exports = TweetList;
+
+
+/***/ },
+/* 192 */
+/***/ function(module, exports, __webpack_require__) {
+
+	function getNumberOfTweetsInCollection (collection) {
+	    var TweetUtils = __webpack_require__(193);
+	    var listOfCollectionTweetIds = TweetUtils.getListOfTweetIds(collection);
+	    return listOfCollectionTweetIds.length;
+	}
+	
+	function isEmptyCollection(collection) {
+	        return (getNumberOfTweetsInCollection(collection) === 0);
+	}
+	
+	module.exports = {
+	    getNumberOfTweetsInCollection : getNumberOfTweetsInCollection,
+	    isEmptyCollection:isEmptyCollection
+	}
+	
+
+
+/***/ },
+/* 193 */
+/***/ function(module, exports) {
+
+	function getListOfTweetIds(tweets) {
+	    return Object.keys(tweets);
+	}
+	module.exports.getListOfTweetIds = getListOfTweetIds;
+
+/***/ },
+/* 194 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var SnapKiteStreamclient = __webpack_require__(195);
+	var TweetActionCreators = __webpack_require__(246);
+	
+	function initializeStreamOfTweets() {
+	    SnapKiteStreamclient.initializeStream(TweetActionCreators.receiveTweet);
+	}
+	
+	module.exports = {
+	    initializeStreamOfTweets : initializeStreamOfTweets
+	}
+
+
+/***/ },
+/* 195 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var config = {
@@ -20498,7 +22068,7 @@
 	    }
 	  }
 	
-	  socket = __webpack_require__(171)('http://' + config.hostname + ':' + config.port);
+	  socket = __webpack_require__(196)('http://' + config.hostname + ':' + config.port);
 	  tweetsQueue = new TweetsQueue();
 	
 	  socket.on('connect', function () {
@@ -20540,7 +22110,7 @@
 
 
 /***/ },
-/* 171 */
+/* 196 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -20548,10 +22118,10 @@
 	 * Module dependencies.
 	 */
 	
-	var url = __webpack_require__(172);
-	var parser = __webpack_require__(177);
-	var Manager = __webpack_require__(185);
-	var debug = __webpack_require__(174)('socket.io-client');
+	var url = __webpack_require__(197);
+	var parser = __webpack_require__(202);
+	var Manager = __webpack_require__(210);
+	var debug = __webpack_require__(199)('socket.io-client');
 	
 	/**
 	 * Module exports.
@@ -20633,12 +22203,12 @@
 	 * @api public
 	 */
 	
-	exports.Manager = __webpack_require__(185);
-	exports.Socket = __webpack_require__(212);
+	exports.Manager = __webpack_require__(210);
+	exports.Socket = __webpack_require__(238);
 
 
 /***/ },
-/* 172 */
+/* 197 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -20646,8 +22216,8 @@
 	 * Module dependencies.
 	 */
 	
-	var parseuri = __webpack_require__(173);
-	var debug = __webpack_require__(174)('socket.io-client:url');
+	var parseuri = __webpack_require__(198);
+	var debug = __webpack_require__(199)('socket.io-client:url');
 	
 	/**
 	 * Module exports.
@@ -20721,7 +22291,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 173 */
+/* 198 */
 /***/ function(module, exports) {
 
 	/**
@@ -20766,7 +22336,7 @@
 
 
 /***/ },
-/* 174 */
+/* 199 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -20776,7 +22346,7 @@
 	 * Expose `debug()` as the module.
 	 */
 	
-	exports = module.exports = __webpack_require__(175);
+	exports = module.exports = __webpack_require__(200);
 	exports.log = log;
 	exports.formatArgs = formatArgs;
 	exports.save = save;
@@ -20940,7 +22510,7 @@
 
 
 /***/ },
-/* 175 */
+/* 200 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -20956,7 +22526,7 @@
 	exports.disable = disable;
 	exports.enable = enable;
 	exports.enabled = enabled;
-	exports.humanize = __webpack_require__(176);
+	exports.humanize = __webpack_require__(201);
 	
 	/**
 	 * The currently active debug mode names, and names to skip.
@@ -21143,7 +22713,7 @@
 
 
 /***/ },
-/* 176 */
+/* 201 */
 /***/ function(module, exports) {
 
 	/**
@@ -21274,7 +22844,7 @@
 
 
 /***/ },
-/* 177 */
+/* 202 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -21282,12 +22852,12 @@
 	 * Module dependencies.
 	 */
 	
-	var debug = __webpack_require__(174)('socket.io-parser');
-	var json = __webpack_require__(178);
-	var isArray = __webpack_require__(181);
-	var Emitter = __webpack_require__(182);
-	var binary = __webpack_require__(183);
-	var isBuf = __webpack_require__(184);
+	var debug = __webpack_require__(199)('socket.io-parser');
+	var json = __webpack_require__(203);
+	var isArray = __webpack_require__(206);
+	var Emitter = __webpack_require__(207);
+	var binary = __webpack_require__(208);
+	var isBuf = __webpack_require__(209);
 	
 	/**
 	 * Protocol version.
@@ -21680,14 +23250,14 @@
 
 
 /***/ },
-/* 178 */
+/* 203 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 	;(function () {
 	  // Detect the `define` function exposed by asynchronous module loaders. The
 	  // strict `define` check is necessary for compatibility with `r.js`.
-	  var isLoader = "function" === "function" && __webpack_require__(180);
+	  var isLoader = "function" === "function" && __webpack_require__(205);
 	
 	  // A set of types used to distinguish objects from primitives.
 	  var objectTypes = {
@@ -22586,10 +24156,10 @@
 	  }
 	}).call(this);
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(179)(module), (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(204)(module), (function() { return this; }())))
 
 /***/ },
-/* 179 */
+/* 204 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -22605,7 +24175,7 @@
 
 
 /***/ },
-/* 180 */
+/* 205 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;
@@ -22613,7 +24183,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ },
-/* 181 */
+/* 206 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -22622,7 +24192,7 @@
 
 
 /***/ },
-/* 182 */
+/* 207 */
 /***/ function(module, exports) {
 
 	
@@ -22792,7 +24362,7 @@
 
 
 /***/ },
-/* 183 */
+/* 208 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*global Blob,File*/
@@ -22801,8 +24371,8 @@
 	 * Module requirements
 	 */
 	
-	var isArray = __webpack_require__(181);
-	var isBuf = __webpack_require__(184);
+	var isArray = __webpack_require__(206);
+	var isBuf = __webpack_require__(209);
 	
 	/**
 	 * Replaces every Buffer | ArrayBuffer in packet with a numbered placeholder.
@@ -22940,7 +24510,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 184 */
+/* 209 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -22960,7 +24530,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 185 */
+/* 210 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -22968,15 +24538,15 @@
 	 * Module dependencies.
 	 */
 	
-	var eio = __webpack_require__(186);
-	var Socket = __webpack_require__(212);
-	var Emitter = __webpack_require__(213);
-	var parser = __webpack_require__(177);
-	var on = __webpack_require__(215);
-	var bind = __webpack_require__(216);
-	var debug = __webpack_require__(174)('socket.io-client:manager');
-	var indexOf = __webpack_require__(210);
-	var Backoff = __webpack_require__(218);
+	var eio = __webpack_require__(211);
+	var Socket = __webpack_require__(238);
+	var Emitter = __webpack_require__(239);
+	var parser = __webpack_require__(202);
+	var on = __webpack_require__(241);
+	var bind = __webpack_require__(242);
+	var debug = __webpack_require__(199)('socket.io-client:manager');
+	var indexOf = __webpack_require__(236);
+	var Backoff = __webpack_require__(245);
 	
 	/**
 	 * IE6+ hasOwnProperty
@@ -23523,19 +25093,19 @@
 
 
 /***/ },
-/* 186 */
+/* 211 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	module.exports =  __webpack_require__(187);
+	module.exports =  __webpack_require__(212);
 
 
 /***/ },
-/* 187 */
+/* 212 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	module.exports = __webpack_require__(188);
+	module.exports = __webpack_require__(213);
 	
 	/**
 	 * Exports parser
@@ -23543,25 +25113,25 @@
 	 * @api public
 	 *
 	 */
-	module.exports.parser = __webpack_require__(195);
+	module.exports.parser = __webpack_require__(220);
 
 
 /***/ },
-/* 188 */
+/* 213 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 	
-	var transports = __webpack_require__(189);
-	var Emitter = __webpack_require__(203);
-	var debug = __webpack_require__(174)('engine.io-client:socket');
-	var index = __webpack_require__(210);
-	var parser = __webpack_require__(195);
-	var parseuri = __webpack_require__(173);
-	var parsejson = __webpack_require__(211);
-	var parseqs = __webpack_require__(204);
+	var transports = __webpack_require__(214);
+	var Emitter = __webpack_require__(229);
+	var debug = __webpack_require__(199)('engine.io-client:socket');
+	var index = __webpack_require__(236);
+	var parser = __webpack_require__(220);
+	var parseuri = __webpack_require__(198);
+	var parsejson = __webpack_require__(237);
+	var parseqs = __webpack_require__(230);
 	
 	/**
 	 * Module exports.
@@ -23685,9 +25255,9 @@
 	 */
 	
 	Socket.Socket = Socket;
-	Socket.Transport = __webpack_require__(194);
-	Socket.transports = __webpack_require__(189);
-	Socket.parser = __webpack_require__(195);
+	Socket.Transport = __webpack_require__(219);
+	Socket.transports = __webpack_require__(214);
+	Socket.parser = __webpack_require__(220);
 	
 	/**
 	 * Creates transport of the given type.
@@ -24282,17 +25852,17 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 189 */
+/* 214 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies
 	 */
 	
-	var XMLHttpRequest = __webpack_require__(190);
-	var XHR = __webpack_require__(192);
-	var JSONP = __webpack_require__(207);
-	var websocket = __webpack_require__(208);
+	var XMLHttpRequest = __webpack_require__(215);
+	var XHR = __webpack_require__(217);
+	var JSONP = __webpack_require__(233);
+	var websocket = __webpack_require__(234);
 	
 	/**
 	 * Export transports.
@@ -24342,11 +25912,11 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 190 */
+/* 215 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// browser shim for xmlhttprequest module
-	var hasCORS = __webpack_require__(191);
+	var hasCORS = __webpack_require__(216);
 	
 	module.exports = function(opts) {
 	  var xdomain = opts.xdomain;
@@ -24384,7 +25954,7 @@
 
 
 /***/ },
-/* 191 */
+/* 216 */
 /***/ function(module, exports) {
 
 	
@@ -24407,18 +25977,18 @@
 
 
 /***/ },
-/* 192 */
+/* 217 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module requirements.
 	 */
 	
-	var XMLHttpRequest = __webpack_require__(190);
-	var Polling = __webpack_require__(193);
-	var Emitter = __webpack_require__(203);
-	var inherit = __webpack_require__(205);
-	var debug = __webpack_require__(174)('engine.io-client:polling-xhr');
+	var XMLHttpRequest = __webpack_require__(215);
+	var Polling = __webpack_require__(218);
+	var Emitter = __webpack_require__(229);
+	var inherit = __webpack_require__(231);
+	var debug = __webpack_require__(199)('engine.io-client:polling-xhr');
 	
 	/**
 	 * Module exports.
@@ -24826,19 +26396,19 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 193 */
+/* 218 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 	
-	var Transport = __webpack_require__(194);
-	var parseqs = __webpack_require__(204);
-	var parser = __webpack_require__(195);
-	var inherit = __webpack_require__(205);
-	var yeast = __webpack_require__(206);
-	var debug = __webpack_require__(174)('engine.io-client:polling');
+	var Transport = __webpack_require__(219);
+	var parseqs = __webpack_require__(230);
+	var parser = __webpack_require__(220);
+	var inherit = __webpack_require__(231);
+	var yeast = __webpack_require__(232);
+	var debug = __webpack_require__(199)('engine.io-client:polling');
 	
 	/**
 	 * Module exports.
@@ -24851,7 +26421,7 @@
 	 */
 	
 	var hasXHR2 = (function() {
-	  var XMLHttpRequest = __webpack_require__(190);
+	  var XMLHttpRequest = __webpack_require__(215);
 	  var xhr = new XMLHttpRequest({ xdomain: false });
 	  return null != xhr.responseType;
 	})();
@@ -25079,15 +26649,15 @@
 
 
 /***/ },
-/* 194 */
+/* 219 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 	
-	var parser = __webpack_require__(195);
-	var Emitter = __webpack_require__(203);
+	var parser = __webpack_require__(220);
+	var Emitter = __webpack_require__(229);
 	
 	/**
 	 * Module exports.
@@ -25240,19 +26810,19 @@
 
 
 /***/ },
-/* 195 */
+/* 220 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 	
-	var keys = __webpack_require__(196);
-	var hasBinary = __webpack_require__(197);
-	var sliceBuffer = __webpack_require__(198);
-	var base64encoder = __webpack_require__(199);
-	var after = __webpack_require__(200);
-	var utf8 = __webpack_require__(201);
+	var keys = __webpack_require__(221);
+	var hasBinary = __webpack_require__(222);
+	var sliceBuffer = __webpack_require__(224);
+	var base64encoder = __webpack_require__(225);
+	var after = __webpack_require__(226);
+	var utf8 = __webpack_require__(227);
 	
 	/**
 	 * Check if we are running an android browser. That requires us to use
@@ -25309,7 +26879,7 @@
 	 * Create a blob api even for blob builder when vendor prefixes exist
 	 */
 	
-	var Blob = __webpack_require__(202);
+	var Blob = __webpack_require__(228);
 	
 	/**
 	 * Encodes a packet.
@@ -25841,7 +27411,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 196 */
+/* 221 */
 /***/ function(module, exports) {
 
 	
@@ -25866,7 +27436,7 @@
 
 
 /***/ },
-/* 197 */
+/* 222 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -25874,7 +27444,7 @@
 	 * Module requirements.
 	 */
 	
-	var isArray = __webpack_require__(181);
+	var isArray = __webpack_require__(223);
 	
 	/**
 	 * Module exports.
@@ -25931,7 +27501,16 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 198 */
+/* 223 */
+/***/ function(module, exports) {
+
+	module.exports = Array.isArray || function (arr) {
+	  return Object.prototype.toString.call(arr) == '[object Array]';
+	};
+
+
+/***/ },
+/* 224 */
 /***/ function(module, exports) {
 
 	/**
@@ -25966,7 +27545,7 @@
 
 
 /***/ },
-/* 199 */
+/* 225 */
 /***/ function(module, exports) {
 
 	/*
@@ -26031,7 +27610,7 @@
 
 
 /***/ },
-/* 200 */
+/* 226 */
 /***/ function(module, exports) {
 
 	module.exports = after
@@ -26065,7 +27644,7 @@
 
 
 /***/ },
-/* 201 */
+/* 227 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! https://mths.be/utf8js v2.0.0 by @mathias */
@@ -26311,10 +27890,10 @@
 	
 	}(this));
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(179)(module), (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(204)(module), (function() { return this; }())))
 
 /***/ },
-/* 202 */
+/* 228 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -26417,7 +27996,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 203 */
+/* 229 */
 /***/ function(module, exports) {
 
 	
@@ -26587,7 +28166,7 @@
 
 
 /***/ },
-/* 204 */
+/* 230 */
 /***/ function(module, exports) {
 
 	/**
@@ -26630,7 +28209,7 @@
 
 
 /***/ },
-/* 205 */
+/* 231 */
 /***/ function(module, exports) {
 
 	
@@ -26642,7 +28221,7 @@
 	};
 
 /***/ },
-/* 206 */
+/* 232 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -26716,7 +28295,7 @@
 
 
 /***/ },
-/* 207 */
+/* 233 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -26724,8 +28303,8 @@
 	 * Module requirements.
 	 */
 	
-	var Polling = __webpack_require__(193);
-	var inherit = __webpack_require__(205);
+	var Polling = __webpack_require__(218);
+	var inherit = __webpack_require__(231);
 	
 	/**
 	 * Module exports.
@@ -26961,19 +28540,19 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 208 */
+/* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 	
-	var Transport = __webpack_require__(194);
-	var parser = __webpack_require__(195);
-	var parseqs = __webpack_require__(204);
-	var inherit = __webpack_require__(205);
-	var yeast = __webpack_require__(206);
-	var debug = __webpack_require__(174)('engine.io-client:websocket');
+	var Transport = __webpack_require__(219);
+	var parser = __webpack_require__(220);
+	var parseqs = __webpack_require__(230);
+	var inherit = __webpack_require__(231);
+	var yeast = __webpack_require__(232);
+	var debug = __webpack_require__(199)('engine.io-client:websocket');
 	var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 	
 	/**
@@ -26985,7 +28564,7 @@
 	var WebSocket = BrowserWebSocket;
 	if (!WebSocket && typeof window === 'undefined') {
 	  try {
-	    WebSocket = __webpack_require__(209);
+	    WebSocket = __webpack_require__(235);
 	  } catch (e) { }
 	}
 	
@@ -27256,13 +28835,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 209 */
+/* 235 */
 /***/ function(module, exports) {
 
 	/* (ignored) */
 
 /***/ },
-/* 210 */
+/* 236 */
 /***/ function(module, exports) {
 
 	
@@ -27277,7 +28856,7 @@
 	};
 
 /***/ },
-/* 211 */
+/* 237 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -27315,7 +28894,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 212 */
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -27323,13 +28902,13 @@
 	 * Module dependencies.
 	 */
 	
-	var parser = __webpack_require__(177);
-	var Emitter = __webpack_require__(213);
-	var toArray = __webpack_require__(214);
-	var on = __webpack_require__(215);
-	var bind = __webpack_require__(216);
-	var debug = __webpack_require__(174)('socket.io-client:socket');
-	var hasBin = __webpack_require__(217);
+	var parser = __webpack_require__(202);
+	var Emitter = __webpack_require__(239);
+	var toArray = __webpack_require__(240);
+	var on = __webpack_require__(241);
+	var bind = __webpack_require__(242);
+	var debug = __webpack_require__(199)('socket.io-client:socket');
+	var hasBin = __webpack_require__(243);
 	
 	/**
 	 * Module exports.
@@ -27733,7 +29312,7 @@
 
 
 /***/ },
-/* 213 */
+/* 239 */
 /***/ function(module, exports) {
 
 	
@@ -27900,7 +29479,7 @@
 
 
 /***/ },
-/* 214 */
+/* 240 */
 /***/ function(module, exports) {
 
 	module.exports = toArray
@@ -27919,7 +29498,7 @@
 
 
 /***/ },
-/* 215 */
+/* 241 */
 /***/ function(module, exports) {
 
 	
@@ -27949,7 +29528,7 @@
 
 
 /***/ },
-/* 216 */
+/* 242 */
 /***/ function(module, exports) {
 
 	/**
@@ -27978,7 +29557,7 @@
 
 
 /***/ },
-/* 217 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -27986,7 +29565,7 @@
 	 * Module requirements.
 	 */
 	
-	var isArray = __webpack_require__(181);
+	var isArray = __webpack_require__(244);
 	
 	/**
 	 * Module exports.
@@ -28044,7 +29623,16 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 218 */
+/* 244 */
+/***/ function(module, exports) {
+
+	module.exports = Array.isArray || function (arr) {
+	  return Object.prototype.toString.call(arr) == '[object Array]';
+	};
+
+
+/***/ },
+/* 245 */
 /***/ function(module, exports) {
 
 	
@@ -28135,668 +29723,25 @@
 
 
 /***/ },
-/* 219 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(38);
-	var Header = __webpack_require__(220);
-	var Tweet = __webpack_require__(221);
-	//
-	// <p><b>{this.state.tweetKeyword}</b> :: {replaceKeyword(this.state.tweetText, this.state.tweetKeyword)}</p>
-	// function replaceKeyword(text, keyword) {
-	//     console.log(text);
-	//     return text.toString().replace(keyword, `<b>${keyword}<b>`);
-	// }
-	var StreamTweet = React.createClass({displayName: "StreamTweet",
+	var AppDispatcher = __webpack_require__(174);
 	
-	    getInitialState : function() {
-	        //console.log('1. getInitialState()');
-	        return {
-	            numberOfCharactersIsIncreasing : null,
-	            headerText : null
-	        };
-	    },
-	
-	    componentWillMount : function() {
-	        //console.log('2. componentWillMount()');
-	        this.setState({
-	            numberOfCharactersIsIncreasing : true,
-	            headerText : '트위터의 최근 공개 사진'
-	        });
-	
-	        window.snapterest = {
-	            numberOfReceivedTweets : 1,
-	            numberOfDisplayedTweets: 1
-	        }
-	    },
-	
-	    componentDidMound : function() {
-	        //console.log('3. componentDidMount()');
-	        var componentDOMRepresentation = ReactDOM.findDOMNode(this);
-	        window.snapterest.headerHtml = componentDOMRepresentation.children[0].outerHTML;
-	        window.snapterest.tweetHTML  = componentDOMRepresentation.children[1].outerHTML;
-	    },
-	
-	    /**
-	     * 컴포넌트 업데이트 생명주기
-	     */
-	
-	    // 1. 이 메소드가 컴포넌트 생명주기의 업데이트 단계에서 가장 먼저 실행되며, 부모 컴포넌트로부터 새로운 프로퍼티를 받을대 호출 된다.
-	    componentWillReceiveProps : function (nextProps) {
-	        //console.log('4. componentWillReceiveProps()');
-	        var currentTweetLength = this.props.tweet.text.length;
-	        var nextTweetLength = nextProps.tweet.text.length;
-	        var isNumberOfCharactersincreasing = (nextTweetLength > currentTweetLength);
-	        var headerText;
-	
-	        this.setState({
-	            numberOfCharactersIsIncreasing: isNumberOfCharactersincreasing,
-	            tweetText : nextProps.tweet.text,
-	            tweetKeyword : nextProps.tweet.keyword
-	        })
-	
-	        if (isNumberOfCharactersincreasing) {
-	            headerText = '글자수가 늘어나고 있음('+currentTweetLength + ' >> ' + nextTweetLength+')';
-	        } else {
-	            headerText = '최근 공개 사진';
-	        }
-	
-	        this.setState({
-	            headerText : headerText
-	        });
-	
-	        window.snapterest.numberOfReceivedTweets++;
-	    },
-	
-	    // 2. 컴포넌ㅌ의 다음 상태로 컨포넌트의 재렌더링 여부를 결정할 수 있다.
-	    shouldComponentUpdate : function(nextProps, nextState) {
-	        //console.log('5. shouldComponentUpdate()');
-	        return (nextProps.tweet.text.length > 1);
-	
-	    },
-	    // 컴포넌트가 돔을 업데이트하기 바로 직전에 호출된다.
-	    // 메소드가 호출되고 나서, React는 Dom 업데이트를 수행하기 위해 render() 메소드를 실행한다. 이어서 componentDidUpdate() 메소드가 호출된다.
-	    componentWillUpdate : function(nextProps, nextState) {
-	        //console.log('6. componentWillUpdate()');
-	    },
-	
-	    // React에서 DOM을 업데이트하자마자 호출된다. 업데이트된 DOM과 상호작용하거나 렌더링 이후에 명령들을 수행할 수 있다.
-	    componentDidUpdate : function(prevProps, prevState) {
-	        //console.log('7. componentDidUpdate()');
-	        window.snapterest.numberOfReceivedTweets++;
-	    },
-	
-	    componentWillUnmount : function() {
-	        //console.log('8. componentWillUnmount()');
-	        delete window.snapterest;
-	    },
-	
-	    render : function() {
-	        var keyword = this.state.tweetKeyword || '';
-	        var text = this.state.tweetText || '';
-	        var tweetText = text.replace(new RegExp('('+keyword+')', 'ig'), `{<b>}$1{</b>}`);
-	        return (
-	            React.createElement("section", null, 
-	                React.createElement(Header, {text: this.state.headerText}), 
-	                React.createElement("p", null, ":: ", React.createElement("b", null, this.state.tweetKeyword), " :: ", tweetText), 
-	                React.createElement(Tweet, {tweet: this.props.tweet, onImageClick: this.props.onAddTweetToCollection})
-	            )
-	        );
-	    }
-	
-	})
-	
-	module.exports = StreamTweet;
-
-
-/***/ },
-/* 220 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(1);
-	
-	var headerStyle = {
-	    fontSize : '16px',
-	    fontWeight : '300',
-	    display : 'block',
-	    margin : '20px 10px'
-	};
-	
-	var Header = React.createClass({displayName: "Header",
-	    getDefaultProps : function() {
-	        return {
-	            text : 'Default Header'
-	        };
-	    },
-	    render : function() {
-	        return (
-	            React.createElement("h2", {style: headerStyle}, this.props.text)
-	        );
-	    }
-	});
-	
-	module.exports = Header;
-
-
-/***/ },
-/* 221 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	var React = __webpack_require__(1);
-	
-	var tweetStyle = {
-	    position: 'relative',
-	    display:'inline-block',
-	    widht:'300px',
-	    height:'400px',
-	    margin:'10px'
-	}
-	
-	var imageStyle = {
-	    maxHeight:'400px',
-	    boxShadow:'0px 1px 1px 0px #aaa',
-	    border:'1px solid #fff'
-	}
-	
-	var Tweet = React.createClass({displayName: "Tweet",
-	    // 유효성 체크는 성능에 영향이 있어 개발용도로 사용한다.
-	    propTypes : {
-	        tweet : function(properties, propertyName, componentName) {
-	            var tweet = properties[propertyName];
-	
-	            if (!tweet) {
-	                return new Error('객체 없음 : !tweet == false, ' + properties + ', ' + propertyName + ', ' + componentName);
-	            }
-	
-	            if (!tweet.media) {
-	                return new Error('미디어 없음 : !tweet.media == false');
-	            }
-	        },
-	
-	        onImageClick: React.PropTypes.func
-	    },
-	
-	    // Application.onAddTweetToCollection()
-	    handleImageClick : function() {
-	
-	        var tweet = this.props.tweet;
-	        var onImageClick = this.props.onImageClick;
-	        if (onImageClick) {
-	            console.log('onImageClick(tweet);');
-	            onImageClick(tweet);
-	        }
-	    },
-	
-	    render : function() {
-	        var tweet = this.props.tweet;
-	        var tweetMediaUrl = tweet.media[0].url;
-	        return (
-	            React.createElement("div", {style: tweetStyle}, 
-	                React.createElement("img", {src: tweetMediaUrl, onClick: this.handleImageClick, style: imageStyle})
-	            )
-	        )
-	    }
-	});
-	
-	module.exports = Tweet;
-
-
-/***/ },
-/* 222 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(1);
-	var ReactDOMServer = __webpack_require__(223);
-	var CollectionControls = __webpack_require__(227);
-	var TweetList = __webpack_require__(231);
-	var Header = __webpack_require__(220);
-	
-	var Collection = React.createClass({displayName: "Collection",
-	    createHtmlMarkupStringOfTweetList : function() {
-	        var htmlString = ReactDOMServer.renderToStaticMarkup(
-	            React.createElement(TweetList, {tweets: this.props.tweets})
-	        );
-	
-	        var htmlMarkup = {
-	            html : htmlString
-	        };
-	        return JSON.stringify(htmlMarkup);
-	    },
-	    getListOfTweetIds : function() {
-	        //console.log('Collection.js : getListOfTweetIds() => ', this.props.tweets);
-	        return Object.keys(this.props.tweets);
-	    },
-	    getNumberOfTweetsInCollection: function() {
-	        return this.getListOfTweetIds().length;
-	    },
-	    render : function() {
-	        var numberOfTweetsInCollection = this.getNumberOfTweetsInCollection();
-	
-	        if ( numberOfTweetsInCollection > 0) {
-	            var tweets = this.props.tweets;
-	            var htmlMarkup = this.createHtmlMarkupStringOfTweetList();
-	            var removeAllTweetsFromCollection = this.props.onRemoveAllTweetsFromCollection;
-	            var handleRemoveTweetFromCollection = this.props.onRemoveTweetFromCollection;
-	            // console.log('tweets : ', tweets);
-	            // console.log('htmlMarkup : ', htmlMarkup);
-	            // console.log('removeAllTweetsFromCollection : ', removeAllTweetsFromCollection);
-	            // console.log('handleRemoveTweetFromCollection : ', handleRemoveTweetFromCollection);
-	            return (
-	                React.createElement("div", null, 
-	                    React.createElement(CollectionControls, {
-	                        numberOfTweetsInCollection: numberOfTweetsInCollection, 
-	                        htmlMarkup: htmlMarkup, 
-	                        onRemoveAllTweetsFromCollection: removeAllTweetsFromCollection}), 
-	                    React.createElement(TweetList, {
-	                        tweets: tweets, onRemoveTweetFromCollection: handleRemoveTweetFromCollection})
-	                )
-	            );
-	        }
-	
-	        return  React.createElement(Header, {text: "컬렉션이 비어 있음(collection.js)"})
-	    }
-	})
-	
-	module.exports = Collection;
-
-
-/***/ },
-/* 223 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	module.exports = __webpack_require__(224);
-
-
-/***/ },
-/* 224 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copyright 2013-present, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule ReactDOMServer
-	 */
-	
-	'use strict';
-	
-	var ReactDefaultInjection = __webpack_require__(43);
-	var ReactServerRendering = __webpack_require__(225);
-	var ReactVersion = __webpack_require__(36);
-	
-	ReactDefaultInjection.inject();
-	
-	var ReactDOMServer = {
-	  renderToString: ReactServerRendering.renderToString,
-	  renderToStaticMarkup: ReactServerRendering.renderToStaticMarkup,
-	  version: ReactVersion
-	};
-	
-	module.exports = ReactDOMServer;
-
-/***/ },
-/* 225 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {/**
-	 * Copyright 2013-present, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule ReactServerRendering
-	 */
-	'use strict';
-	
-	var ReactDOMContainerInfo = __webpack_require__(161);
-	var ReactDefaultBatchingStrategy = __webpack_require__(134);
-	var ReactElement = __webpack_require__(8);
-	var ReactInstrumentation = __webpack_require__(18);
-	var ReactMarkupChecksum = __webpack_require__(163);
-	var ReactReconciler = __webpack_require__(62);
-	var ReactServerBatchingStrategy = __webpack_require__(226);
-	var ReactServerRenderingTransaction = __webpack_require__(128);
-	var ReactUpdates = __webpack_require__(59);
-	
-	var emptyObject = __webpack_require__(26);
-	var instantiateReactComponent = __webpack_require__(119);
-	var invariant = __webpack_require__(7);
-	
-	/**
-	 * @param {ReactElement} element
-	 * @return {string} the HTML markup
-	 */
-	function renderToStringImpl(element, makeStaticMarkup) {
-	  var transaction;
-	  try {
-	    ReactUpdates.injection.injectBatchingStrategy(ReactServerBatchingStrategy);
-	
-	    transaction = ReactServerRenderingTransaction.getPooled(makeStaticMarkup);
-	
-	    return transaction.perform(function () {
-	      if (process.env.NODE_ENV !== 'production') {
-	        ReactInstrumentation.debugTool.onBeginFlush();
-	      }
-	      var componentInstance = instantiateReactComponent(element);
-	      var markup = ReactReconciler.mountComponent(componentInstance, transaction, null, ReactDOMContainerInfo(), emptyObject);
-	      if (process.env.NODE_ENV !== 'production') {
-	        ReactInstrumentation.debugTool.onUnmountComponent(componentInstance._debugID);
-	        ReactInstrumentation.debugTool.onEndFlush();
-	      }
-	      if (!makeStaticMarkup) {
-	        markup = ReactMarkupChecksum.addChecksumToMarkup(markup);
-	      }
-	      return markup;
-	    }, null);
-	  } finally {
-	    ReactServerRenderingTransaction.release(transaction);
-	    // Revert to the DOM batching strategy since these two renderers
-	    // currently share these stateful modules.
-	    ReactUpdates.injection.injectBatchingStrategy(ReactDefaultBatchingStrategy);
-	  }
-	}
-	
-	/**
-	 * Render a ReactElement to its initial HTML. This should only be used on the
-	 * server.
-	 * See https://facebook.github.io/react/docs/top-level-api.html#reactdomserver.rendertostring
-	 */
-	function renderToString(element) {
-	  !ReactElement.isValidElement(element) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'renderToString(): You must pass a valid ReactElement.') : invariant(false) : void 0;
-	  return renderToStringImpl(element, false);
-	}
-	
-	/**
-	 * Similar to renderToString, except this doesn't create extra DOM attributes
-	 * such as data-react-id that React uses internally.
-	 * See https://facebook.github.io/react/docs/top-level-api.html#reactdomserver.rendertostaticmarkup
-	 */
-	function renderToStaticMarkup(element) {
-	  !ReactElement.isValidElement(element) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'renderToStaticMarkup(): You must pass a valid ReactElement.') : invariant(false) : void 0;
-	  return renderToStringImpl(element, true);
+	function receiveTweet(tweet) {
+	    console.log('call receiveTweet');
+	    //console.log('새로운 트윗을 받아서 액션객체를 디스패치에 넣는다.');
+	console.log(tweet);
+	    var action = {
+	        type : 'receive_tweet',
+	        tweet : tweet
+	    };
+	    AppDispatcher.dispatch(action);
 	}
 	
 	module.exports = {
-	  renderToString: renderToString,
-	  renderToStaticMarkup: renderToStaticMarkup
-	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
-
-/***/ },
-/* 226 */
-/***/ function(module, exports) {
-
-	/**
-	 * Copyright 2014-present, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule ReactServerBatchingStrategy
-	 */
-	
-	'use strict';
-	
-	var ReactServerBatchingStrategy = {
-	  isBatchingUpdates: false,
-	  batchedUpdates: function (callback) {
-	    // Don't do anything here. During the server rendering we don't want to
-	    // schedule any updates. We will simply ignore them.
-	  }
-	};
-	
-	module.exports = ReactServerBatchingStrategy;
-
-/***/ },
-/* 227 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(1);
-	var Header = __webpack_require__(220);
-	var Button = __webpack_require__(228);
-	var CollectionRenameForm = __webpack_require__(229);
-	var CollectionExportForm = __webpack_require__(230);
-	
-	var CollectionControls = React.createClass({displayName: "CollectionControls",
-	    getInitialState : function() {
-	        return {
-	            name : 'new',
-	            isEditingName : false
-	        };
-	    },
-	
-	    getHeaderText : function() {
-	        var numberOfTweetsInCollection = this.props.numberOfTweetsInCollection;
-	        var text = numberOfTweetsInCollection;
-	
-	        if (numberOfTweetsInCollection === 1) {
-	            text = text + ' tweet in your';
-	        } else {
-	            text = text + ' tweets in your';
-	        }
-	
-	        return (
-	            React.createElement("span", null, 
-	                text, " ", React.createElement("strong", null, this.state.name), " collection"
-	            )
-	        );
-	    },
-	
-	    toggleEditCollectionName : function() {
-	        this.setState({
-	            isEditingName : !this.state.isEditingName
-	        });
-	    },
-	
-	    setCollectionName : function(name) {
-	        this.setState({
-	            name : name,
-	            isEditingName : false
-	        });
-	    },
-	
-	    render : function() {
-	        if (this.state.isEditingName) {
-	            return (
-	                React.createElement(CollectionRenameForm, {name: this.state.name, 
-	                    onChangeCollectionName: this.setCollectionName, 
-	                    onCancelCollectionNameChange: this.toggleEditCollectionName})
-	            );
-	        }
-	
-	        return (
-	            React.createElement("div", null, 
-	                React.createElement(Header, {text: this.getHeaderText()}), 
-	                React.createElement(Button, {label: "이름 변경", handleClick: this.toggleEditCollectionName}), 
-	                React.createElement(Button, {label: "컬렉션 모두 삭제", handleClick: this.props.onRemoveAllTweetsFromCollection}), 
-	                React.createElement(CollectionExportForm, {htmlMarkup: this.props.htmlMarkup})
-	            )
-	        );
-	    }
-	});
-	
-	module.exports = CollectionControls;
-
-
-/***/ },
-/* 228 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(1);
-	
-	var buttonStyle = {
-	    margin: '10px 10px 10px 0'
-	};
-	
-	var Button = React.createClass({displayName: "Button",
-	    render : function() {
-	        return React.createElement("button", {className: "btn-btn-default", style: buttonStyle, 
-	            onClick: this.props.handleClick}, this.props.label)
-	    }
-	});
-	
-	module.exports = Button;
-
-
-/***/ },
-/* 229 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(38);
-	var Header = __webpack_require__(220);
-	var Button = __webpack_require__(228);
-	
-	var inputStyle = {
-	    marginRight : '5px'
+	    receiveTweet : receiveTweet
 	}
-	
-	var CollectionRenameForm = React.createClass({displayName: "CollectionRenameForm",
-	    getInitialState: function() {
-	        return {
-	            inputValue : this.props.name
-	        }
-	    },
-	
-	    setInputValue : function(inputValue) {
-	        this.setState({
-	            inputValue : inputValue
-	        });
-	    },
-	
-	    handleInputValueChange : function( event ) {
-	        var inputValue = event.target.value;
-	        this.setInputValue(inputValue);
-	    },
-	
-	    handleFormSubmit : function(event) {
-	        console.log('handleFormSubmit');
-	        event.preventDefault();
-	        var collectionName = this.state.inputValue;
-	        this.props.onChangeCollectionName(collectionName);
-	    },
-	
-	    handleFormCancel : function(event) {
-	        console.log('handleFormCancel');
-	        event.preventDefault();
-	        var collectionname = this.props.name;
-	        this.setInputValue(collectionName);
-	        this.props.onCancelCollectionNameChange();
-	
-	    },
-	
-	    componentDidMount : function() {
-	        this.refs.collectionName.focus();
-	    },
-	
-	    render: function() {
-	        // ref : render() 메소드에 의해 반환되는 컴포넌트에 적용될 수 있는 특별한 용도의 React 프로퍼티다.
-	        //       외부의 컴포넌트에서 refs.collectionName 형식으로 참조할 수 있다.
-	        return (
-	            React.createElement("form", {className: "form-inline", onSubmit: this.handleFormSubmit}, 
-	                React.createElement(Header, {Text: "컬렉션 이름 : "}), 
-	                React.createElement("div", {className: "form-group"}, 
-	                    React.createElement("input", {classNamme: "form-control", 
-	                        style: inputStyle, 
-	                        onChange: this.handleInputValueChange, 
-	                        value: this.state.inputValue, 
-	                        ref: "collectionName"})
-	                ), 
-	                React.createElement(Button, {label: "이름변경", handleclick: this.handleFormSubmit}), 
-	                React.createElement(Button, {label: "취소", handleclick: this.handleFormCancel})
-	            )
-	        );
-	    }
-	});
-	
-	module.exports = CollectionRenameForm;
-
-
-/***/ },
-/* 230 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(1);
-	
-	var formStyle={
-	    display:'inline-block'
-	};
-	
-	var CollectionExportForm = React.createClass({displayName: "CollectionExportForm",
-	    render : function() {
-	        return (
-	            React.createElement("form", {action: "http://codepen.io/pen/define", method: "post", target: "_black", style: formStyle}, 
-	                React.createElement("input", {type: "hidden", name: "data", value: this.props.htmlMarkup}), 
-	                React.createElement("button", {type: "submit", className: "btn btn-default"}, "Export as HTML")
-	            )
-	        );
-	    }
-	});
-	
-	module.exports = CollectionExportForm;
-
-
-/***/ },
-/* 231 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(1);
-	var Tweet = __webpack_require__(221);
-	
-	var listStyle = {
-	    padding : 0
-	};
-	
-	var listItemStyle = {
-	    display:'inline-block',
-	    listStyle : 'none'
-	};
-	
-	var TweetList = React.createClass({displayName: "TweetList",
-	    getListOfTweetIds : function() {
-	        return Object.keys(this.props.tweets);
-	    },
-	
-	    getTweetElement: function(tweetId) {
-	        var tweet = this.props.tweets[tweetId];
-	        var handleRemoveTweetFromcollection = this.props.onRemoveTweetFromCllection;
-	        var tweetElement;
-	
-	        if ( handleRemoveTweetFromcollection ) {
-	            tweetElement = (
-	                React.createElement(Tweet, {tweet: tweet, onImageClick: handleRemoveTweetFromcollection})
-	            );
-	        } else {
-	            tweetElement = (
-	                React.createElement(Tweet, {tweet: tweet})
-	            );
-	        }
-	
-	        return React.createElement("li", {style: listItemStyle, key: tweet.id}, tweetElement);
-	    },
-	
-	    render : function() {
-	        var tweetElements = this.getListOfTweetIds().reverse().map(this.getTweetElement);
-	        return (
-	            React.createElement("ul", {style: listStyle}, tweetElements)
-	        );
-	    }
-	
-	});
-	
-	module.exports = TweetList;
 
 
 /***/ }

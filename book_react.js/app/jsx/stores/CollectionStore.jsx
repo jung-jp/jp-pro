@@ -39,7 +39,7 @@ var CollectionStore = assign({}, EventEmitter.prototype, {
     },
 
     getCollectionName : function() {
-        return collectionname;
+        return collectionName;
     }
 });
 
@@ -54,7 +54,7 @@ function handleAction(action) {
             emitChange();
             break;
         case 'remove_all_tweets_from_collection' :
-            removeAllTweetFromCollection();
+            removeAllTweetsFromCollection();
             emitChange();
             break;
         case 'set_collection_name' :
@@ -68,3 +68,4 @@ function handleAction(action) {
 
 CollectionStore.dispatchToken = AppDispatcher.register(handleAction);
 module.exports = CollectionStore;
+

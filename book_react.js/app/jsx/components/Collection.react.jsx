@@ -22,7 +22,7 @@ var Collection = React.createClass({
         CollectionStroe.removeChangeListener(this.onCollectionChange);
     },
 
-    onCollectionCahnge : function() {
+    onCollectionChange : function() {
         this.setState({
             collectionTweets : CollectionStore.getCollectionTweets()
         });
@@ -30,7 +30,7 @@ var Collection = React.createClass({
 
     createHtmlMarkupStringOfTweetList : function() {
         var htmlString = ReactDOMServer.renderToStaticMarkup(
-            <TweetList tweets={this.props.tweets} />
+            <TweetList tweets={this.state.collectionTweets} />
         );
 
         var htmlMarkup = {
@@ -58,39 +58,6 @@ var Collection = React.createClass({
         return  <Header text="컬렉션이 비어 있음(collection.js)" />
     }
 
-    // getListOfTweetIds : function() {
-    //     //console.log('Collection.js : getListOfTweetIds() => ', this.props.tweets);
-    //     return Object.keys(this.props.tweets);
-    // },
-    // getNumberOfTweetsInCollection: function() {
-    //     return this.getListOfTweetIds().length;
-    // },
-    // render : function() {
-    //     var numberOfTweetsInCollection = this.getNumberOfTweetsInCollection();
-    //
-    //     if ( numberOfTweetsInCollection > 0) {
-    //         var tweets = this.props.tweets;
-    //         var htmlMarkup = this.createHtmlMarkupStringOfTweetList();
-    //         var removeAllTweetsFromCollection = this.props.onRemoveAllTweetsFromCollection;
-    //         var handleRemoveTweetFromCollection = this.props.onRemoveTweetFromCollection;
-    //         // console.log('tweets : ', tweets);
-    //         // console.log('htmlMarkup : ', htmlMarkup);
-    //         // console.log('removeAllTweetsFromCollection : ', removeAllTweetsFromCollection);
-    //         // console.log('handleRemoveTweetFromCollection : ', handleRemoveTweetFromCollection);
-    //         return (
-    //             <div>
-    //                 <CollectionControls
-    //                     numberOfTweetsInCollection={numberOfTweetsInCollection}
-    //                     htmlMarkup={htmlMarkup}
-    //                     onRemoveAllTweetsFromCollection={removeAllTweetsFromCollection} />
-    //                 <TweetList
-    //                     tweets={tweets} onRemoveTweetFromCollection={handleRemoveTweetFromCollection} />
-    //             </div>
-    //         );
-    //     }
-    //
-    //     return  <Header text="컬렉션이 비어 있음(collection.js)" />
-    // }
 })
 
 module.exports = Collection;

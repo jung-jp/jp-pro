@@ -7,7 +7,7 @@ module.exports = {
             tweet : tweet
         };
 
-        Appdispatcher.dispatch(action);
+        AppDispatcher.dispatch(action);
     },
 
     removeTweetFromCollection : function(tweetId) {
@@ -21,8 +21,7 @@ module.exports = {
 
     removeAllTweetsFromCollection : function() {
         var action = {
-            type : 'set_collection_name',
-            collectionName : collectionName
+            type : 'remove_all_tweets_from_collection'
         }
 
         AppDispatcher.dispatch(action);
@@ -31,11 +30,11 @@ module.exports = {
     setCollectionName : function(collectionName) {
         var action = {
             type : 'set_collection_name',
-            collectionName : collectionName;
+            collectionName : collectionName
         }
 
         AppDispatcher.dispatch(action);
     }
 
 
-}
+};

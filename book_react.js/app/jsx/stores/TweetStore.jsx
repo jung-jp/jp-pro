@@ -24,11 +24,11 @@ var TweetStore = assign({}, EventEmitter.prototype, {
 });
 
 function handleAction(action) {
-    if ( action.type === 'recevie_tweet' ) {
+    if ( action.type === 'receive_tweet' ) {
         setTweet(action.tweet);
         emitChange();
     }
 }
 
-TweetStore.dispatchToken = Appdispatcher.register(handleAction);
+TweetStore.dispatchToken = AppDispatcher.register(handleAction);
 module.exports = TweetStore;

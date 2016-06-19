@@ -13,16 +13,10 @@ var CollectionControls = React.createClass({
         };
     },
 
-    // getInitialState : function() {
-    //     return {
-    //         name : 'new',
-    //         isEditingName : false
-    //     };
-    // },
-
     getHeaderText : function() {
         var numberOfTweetsInCollection = this.props.numberOfTweetsInCollection;
-        var text = numberOfTweetsInCollection;
+        var text = '';
+        var name = CollectionStore.getCollectionName();
 
         if (numberOfTweetsInCollection === 1) {
             text = text + ' tweet in your';
@@ -32,7 +26,7 @@ var CollectionControls = React.createClass({
 
         return (
             <span>
-                {text} <strong>{this.state.name}</strong> collection
+                {text} <strong>{name}</strong> collection
             </span>
         );
     },
@@ -42,13 +36,6 @@ var CollectionControls = React.createClass({
             isEditingName : !this.state.isEditingName
         });
     },
-    //
-    // setCollectionName : function(name) {
-    //     this.setState({
-    //         name : name,
-    //         isEditingName : false
-    //     });
-    // },
 
     removeAllTweetsFromCollection : function() {
         CollectionActionCreators.removeAllTweetsFromCollection();

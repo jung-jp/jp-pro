@@ -12,15 +12,9 @@ var inputStyle = {
 var CollectionRenameForm = React.createClass({
     getInitialState: function() {
         return {
-            inputValue : CollectionStore.getCollectionName();
-        }
+            inputValue : CollectionStore.getCollectionName()
+        };
     },
-
-    // getInitialState: function() {
-    //     return {
-    //         inputValue : this.props.name
-    //     }
-    // },
 
     setInputValue : function(inputValue) {
         this.setState({
@@ -46,7 +40,7 @@ var CollectionRenameForm = React.createClass({
         console.log('handleFormCancel');
         event.preventDefault();
         // var collectionname = this.props.name;
-        var collectionname = ColletionStore.getCollectionName();
+        var collectionName = ColletionStore.getCollectionName();
         this.setInputValue(collectionName);
         this.props.onCancelCollectionNameChange();
 

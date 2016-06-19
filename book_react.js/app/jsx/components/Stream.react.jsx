@@ -1,61 +1,43 @@
 var React = require('react');
-// var SnapkiteStreamClient = require('snapkite-stream-client');
 var StreamTweet = require('./StreamTweet.react');
 var Header = require('./Header.react');
 var TweetStore = require('../stores/TweetStore');
 
 var Stream = React.createClass({
-    // tweet 초기화
-    getInitialState : function() {
-        return {
-            // tweet : null
-            tweet : TweetStore.getTweet()
-        }
-    },
 
-    // componentDidMount : function() {
-    //     SnapkiteStreamClient.initializeStream(this.handleNewTweet);
-    // },
-    //
-    // componentWillUnmount : function() {
-    //     SnapkiteStreamClient.destroyStream();
-    // },
-    // //call back :: tweet를 받아와 셋 한다.
-    // handleNewTweet:function(tweet) {
-    //     this.setState({
-    //         tweet : tweet
-    //     });
-    // },
+  getInitialState: function () {
+    return {
+      tweet: TweetStore.getTweet()
+    };
+  },
 
-    componentDidMount : function() {
-        TweetStore.addChangeListener(this.onTweetChange);
-    },
-    componentWillUnmount : function() {
-        TweetStore.removeChangeListener(this.onTweetChange);
-    },
+  componentDidMount: function () {
+    TweetStore.addChangeListener(this.onTweetChange);
+  },
 
-    onTweetChange : function () {
-        this.setState({
-            tweet : TweetStore.getTweet()
-        })
-    },
+  componentWillUnmount: function () {
+    TweetStore.removeChangeListener(this.onTweetChange);
+  },
 
-    render : function() {
-        var tweet = this.state.tweet;
-        if ( tweet ) {
-            // return (
-            //     <StreamTweet tweet={tweet} onAddTweetToCollection={this.props.onAddTweetToCollection} />
-            // );
+  onTweetChange: function () {
+    this.setState({
+      tweet: TweetStore.getTweet()
+    });
+  },
 
-             return (
-                <StreamTweet tweet={tweet} />
-            );
-        }
+  render: function () {
+    var tweet = this.state.tweet;
 
-        return (
-            <Header text="Waiting for public photos from Twitter..." />
-        );
+    if (tweet) {
+      return (
+        <StreamTweet tweet={tweet} />
+      );
     }
+
+    return (
+      <Header text="Waiting for public photos from Twitter..." />
+    );
+  }
 });
 
 module.exports = Stream;

@@ -17,8 +17,8 @@ var TweetList = React.createClass({
     },
 
     removeTweetFromCollection : function(tweet) {
-        CollectionActionCreators.removeTweetFromCollection();
-    }
+        CollectionActionCreators.removeTweetFromCollection(tweet.id);
+    },
 
     getTweetElement: function(tweetId) {
         var tweet = this.props.tweets[tweetId];
