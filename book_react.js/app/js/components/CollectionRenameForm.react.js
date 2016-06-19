@@ -2,6 +2,8 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Header = require('./Header.react');
 var Button = require('./Button.react');
+var CollectionActionCreators = require('../actions/CollectionActionCreators');
+var CollectionStore = require('../stores/CollectionStore');
 
 var inputStyle = {
     marginRight : '5px'
@@ -10,8 +12,8 @@ var inputStyle = {
 var CollectionRenameForm = React.createClass({displayName: "CollectionRenameForm",
     getInitialState: function() {
         return {
-            inputValue : this.props.name
-        }
+            inputValue : CollectionStore.getCollectionName()
+        };
     },
 
     setInputValue : function(inputValue) {
@@ -29,13 +31,16 @@ var CollectionRenameForm = React.createClass({displayName: "CollectionRenameForm
         console.log('handleFormSubmit');
         event.preventDefault();
         var collectionName = this.state.inputValue;
-        this.props.onChangeCollectionName(collectionName);
+        CollectionActionCreators.setCollectionName(collectionName);
+        this.props.onCancelCollectionNameChange();
+        // this.props.onChangeCollectionName(collectionName);
     },
 
     handleFormCancel : function(event) {
         console.log('handleFormCancel');
         event.preventDefault();
-        var collectionname = this.props.name;
+        // var collectionname = this.props.name;
+        var collectionName = ColletionStore.getCollectionName();
         this.setInputValue(collectionName);
         this.props.onCancelCollectionNameChange();
 

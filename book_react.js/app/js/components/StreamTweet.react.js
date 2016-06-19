@@ -2,12 +2,8 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Header = require('./Header.react');
 var Tweet = require('./Tweet.react');
-//
-// <p><b>{this.state.tweetKeyword}</b> :: {replaceKeyword(this.state.tweetText, this.state.tweetKeyword)}</p>
-// function replaceKeyword(text, keyword) {
-//     console.log(text);
-//     return text.toString().replace(keyword, `<b>${keyword}<b>`);
-// }
+var CollectionActionCreators = require('../actions/CollectionActionCreators');
+
 var StreamTweet = React.createClass({displayName: "StreamTweet",
 
     getInitialState : function() {
@@ -28,7 +24,7 @@ var StreamTweet = React.createClass({displayName: "StreamTweet",
         window.snapterest = {
             numberOfReceivedTweets : 1,
             numberOfDisplayedTweets: 1
-        }
+        };
     },
 
     componentDidMound : function() {
@@ -54,7 +50,7 @@ var StreamTweet = React.createClass({displayName: "StreamTweet",
             numberOfCharactersIsIncreasing: isNumberOfCharactersincreasing,
             tweetText : nextProps.tweet.text,
             tweetKeyword : nextProps.tweet.keyword
-        })
+        });
 
         if (isNumberOfCharactersincreasing) {
             headerText = '글자수가 늘어나고 있음('+currentTweetLength + ' >> ' + nextTweetLength+')';
@@ -75,6 +71,7 @@ var StreamTweet = React.createClass({displayName: "StreamTweet",
         return (nextProps.tweet.text.length > 1);
 
     },
+
     // 컴포넌트가 돔을 업데이트하기 바로 직전에 호출된다.
     // 메소드가 호출되고 나서, React는 Dom 업데이트를 수행하기 위해 render() 메소드를 실행한다. 이어서 componentDidUpdate() 메소드가 호출된다.
     componentWillUpdate : function(nextProps, nextState) {
@@ -92,15 +89,19 @@ var StreamTweet = React.createClass({displayName: "StreamTweet",
         delete window.snapterest;
     },
 
+    addTweetToCollection : function(tweet) {
+        CollectionActionCreators.addTweetToCollection(tweet);
+    },
+
     render : function() {
         var keyword = this.state.tweetKeyword || '';
         var text = this.state.tweetText || '';
-        var tweetText = text.replace(new RegExp('('+keyword+')', 'ig'), `{<b>}$1{</b>}`);
+        //var tweetText = text.replace(new RegExp('('+keyword+')', 'ig'), `{<b>}$1{</b>}`);
         return (
             React.createElement("section", null, 
                 React.createElement(Header, {text: this.state.headerText}), 
-                React.createElement("p", null, ":: ", React.createElement("b", null, this.state.tweetKeyword), " :: ", tweetText), 
-                React.createElement(Tweet, {tweet: this.props.tweet, onImageClick: this.props.onAddTweetToCollection})
+                React.createElement("p", null, ":: ", React.createElement("b", null, keyword), " :: ", text), 
+                React.createElement(Tweet, {tweet: this.props.tweet, onImageClick: this.addTweetToCollection})
             )
         );
     }
