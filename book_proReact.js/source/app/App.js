@@ -1,7 +1,12 @@
+/**
+ * KanbanBoard 컴포넌트를 랜더링 한다.
+ */
+
 import React from 'react';
 import ReactDom from 'react-dom';
 import KanbanBoard from './KanbanBoard';
 
+// 데이터 하드코딩 (임시사용)
 let cardsList = [
   {
     id: 1,

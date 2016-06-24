@@ -1,3 +1,8 @@
+/**
+ * KanbanBoard 컴포넌트는 props를 통해 cardList를 받고 상태를 필터링해
+ * List 컴포넌트 세게 To Do, In Progress, Done 를 만든다.
+ */
+
 import React, {Component} from 'react';
 import List from './List';
 
