@@ -90,3 +90,11 @@ ul {
   color: #d66;
   content: "✖";
 }
+
+.checklist--add-tack {
+    border : 1px dashed #ddd;
+    width : 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius : 3px;
+}
