@@ -2,7 +2,7 @@
  * 사용자 상호작용이 주로 수행되는 컴포넌트다.
  */
 
-import React, {Component} from 'react';
+import React, {Component, PropTypes} from 'react';
 import CheckList from './CheckList';
 import marked from 'marked';
 
@@ -58,11 +58,11 @@ class Card extends Component
             <div className="card">
                 <div style={sideColor}>
                     <div className={this.state.showDetails ? "card__title card__title--is-open" : "card__title"}
-                        onClick={this.toggleDetails().bind(this)}>{this.props.title}</div>
+                        onClick={this.toggleDetails.bind(this)}>{this.props.title}</div>
                     {cardDetails}
                 </div>
             </div>
-        )
+        );
     };
 }
 

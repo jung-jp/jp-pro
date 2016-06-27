@@ -1,7 +1,7 @@
 /**
  * 카드 아래쪽에 표시되는 CheckList 컴포넌트
  */
-import React, {Component} from 'react';
+import React, {Component, PropTypes} from 'react';
 
 class CheckList extends Component
 {
@@ -22,9 +22,9 @@ class CheckList extends Component
     }
 }
 
-Card.propTypes = {
+CheckList.propTypes = {
     cardId : PropTypes.number,
     taksks : PropTypes.arrayOf(PropTypes.object)
-}
+};
 
 export default CheckList;

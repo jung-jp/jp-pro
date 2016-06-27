@@ -3,7 +3,7 @@
  * List 컴포넌트는 속성을 통해 cards 배열을 받은 다음 제목이나 설명과 같은 개별 정보를 다시 속성을 통해 Card 컴포넌트로 전달한다.
  */
 
-import React, {Component} from 'react';
+import React, {Component, PropTypes} from 'react';
 import Card from './Card';
 
 class List extends Component {
@@ -21,9 +21,9 @@ class List extends Component {
     }
 }
 
-List.propType = {
+List.propTypes = {
     title : PropTypes.string.isRequired,
-    cards : Proptypes.arrayOf(Proptype.object)
+    cards : PropTypes.arrayOf(PropTypes.object)
 };
 
 export default List;

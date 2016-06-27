@@ -1,15 +1,25 @@
 module.exports = {
     entry : [
-        './app/App.js'
+        __dirname + '/app/App.js'
     ],
     output : {
-        path : __dirname,
+        path : __dirname + '/public',
         filename : "bundle.js"
     },
     module:{
         loaders : [{
             test:/\.jsx?$/,
-            loader : 'babel'
+            exclude: /(node_modules|bower_components)/,
+            loader : 'babel',
+            query: {
+              presets: ['react', 'es2015']
+            }
         }]
+    },
+    devServer: {
+        contentBase: __dirname +"/public",
+        colors: true,
+        historyApiFallback: true,
+        inline: true
     }
 };

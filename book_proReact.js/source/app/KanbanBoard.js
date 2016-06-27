@@ -3,7 +3,7 @@
  * List 컴포넌트 세게 To Do, In Progress, Done 를 만든다.
  */
 
-import React, {Component} from 'react';
+import React, {Component, PropTypes} from 'react';
 import List from './List';
 
 class KanbanBoard extends Component {
@@ -19,7 +19,7 @@ class KanbanBoard extends Component {
 }
 
 KanbanBoard.propType = {
-    cards : PropTypes.arrayOf(PropTypes.object);
+    cards : PropTypes.arrayOf(PropTypes.object)
 }
 
 export default KanbanBoard;
