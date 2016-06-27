@@ -1,5 +1,6 @@
 module.exports = {
     entry : [
+        'babel-polyfill', 
         __dirname + '/app/App.js'
     ],
     output : {

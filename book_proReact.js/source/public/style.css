@@ -91,7 +91,7 @@ ul {
   content: "✖";
 }
 
-.checklist--add-tack {
+.checklist--add-task {
     border : 1px dashed #ddd;
     width : 100%;
     padding: 10px;

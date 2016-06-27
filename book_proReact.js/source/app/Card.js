@@ -47,20 +47,24 @@ class Card extends Component
 
         if ( this.state.showdatails ) {
             cardDetails = (
-                <div className="{card__details}">
-                    <span dangerouslySetInnerHTML={{__html:marked(this.props.description)}}></span>
+                <div className="card__details">
+                    <span dangerouslySetInnerHTML={{__html:marked(this.props.description)}} />
                     {/*this.props.description*/}
-                    <CheckList cardId={this.props.id} tasks={this.props.tasks} />
+                    <CheckList
+                        cardId={this.props.id}
+                        tasks={this.props.tasks}
+                        taskCallbacks={this.props.taskCallbacks}
+                    />
                 </div>
             );
         }
         return (
             <div className="card">
-                <div style={sideColor}>
-                    <div className={this.state.showDetails ? "card__title card__title--is-open" : "card__title"}
-                        onClick={this.toggleDetails.bind(this)}>{this.props.title}</div>
-                    {cardDetails}
+                <div style={sideColor} />
+                <div className={this.state.showDetails ? "card__title card__title--is-open" : "card__title"}
+                    onClick={this.toggleDetails.bind(this)}>{this.props.title}
                 </div>
+                {cardDetails}
             </div>
         );
     };
@@ -71,7 +75,8 @@ Card.propTypes = {
     title : titlePropType,
     description : PropTypes.string,
     color : PropTypes.string,
-    taksks : PropTypes.arrayOf(PropTypes.object)
+    taksks : PropTypes.arrayOf(PropTypes.object),
+    taskCallbacks : PropTypes.object
 }
 
 export default Card;
