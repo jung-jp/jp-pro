@@ -1,7 +1,7 @@
 module.exports = {
     entry : [
-        'babel-polyfill', 
-        __dirname + '/app/App.js'
+        'babel-polyfill',
+        __dirname + '/app/AnimatedShoppingList.jsx'
     ],
     output : {
         path : __dirname + '/public',
@@ -16,11 +16,13 @@ module.exports = {
               presets: ['react', 'es2015']
             }
         }]
-    },
+    }
+    ,
     devServer: {
         contentBase: __dirname +"/public",
         colors: true,
         historyApiFallback: true,
         inline: true
     }
+
 };
