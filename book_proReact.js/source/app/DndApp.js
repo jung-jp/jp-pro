@@ -1,8 +1,8 @@
-import react from 'react';
-import reactdom from 'react-dom';
-import Container from './DndContainer';
+import React from 'react';
+import ReactDom from 'react-dom';
+import DndContainer from './DndContainer';
 
-class DdnApp extends react.Component
+class DdnApp extends React.Component
 {
     render() {
         return (
@@ -11,4 +11,4 @@ class DdnApp extends react.Component
     }
 }
 
-reactdom.render(<App />, document.getElementById('root'));
+ReactDom.render(<DdnApp />, document.getElementById('root'));

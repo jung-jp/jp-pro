@@ -10,11 +10,11 @@ class DndContainer extends React.Component
     render() {
         return (
             <div>
-                <DnsSnack name="Chips" />
-                <DnsSnack name="Cupcake" />
-                <DnsSnack name="Donut" />
-                <DnsSnack name="Doritos" />
-                <DnsSnack name="Popcorn" />
+                <DndSnack name="Chips" />
+                <DndSnack name="Cupcake" />
+                <DndSnack name="Donut" />
+                <DndSnack name="Doritos" />
+                <DndSnack name="Popcorn" />
                 <DndShoppingCart />
             </div>
         );

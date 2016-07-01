@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Document</title>
+<script>
+
+class Node()
+{
+    constructor(element) {
+        this.element = element;
+        this.next = null;
+        this.prev = null;
+    }
+}
+
+class CircleLList() {
+    constructor(element) {
+        this.head = new Node('head');
+        this.current = this.head;
+    }
+
+    find(item) {
+        let cur = this.head;
+        while (cur.element != item) {
+            cur = cur.next;
+        }
+        return cur;
+    }
+
+    insert(newEl, item) {
+        let newNode = new Node(newEl);
+        let cur = this.find(item);
+        newNode.next = cur.next;
+        newNode.prev = cur;
+        cur.next = newNode;
+    }
+
+    display() {
+        let curr = this.head;
+        while( curr != null && curr.next.element != 'head' ) {
+            console.log(curr.next.element);
+            currNode = curr.next;
+        }
+    }
+
+    remove(item) {
+        let node = this.find(item);
+        if ( node.next != null && node.element != 'head' ) {
+            node.next.prev = node.prev;
+            node.prev.next = node.next
+        }
+        node = null;
+    }
+
+    // 연결 리스트에서 n 노드만큼 전진(위치를 이동)
+    advance(n = 1) {
+        let cur = this.current;
+        let next = cur.next;
+        let i = 0;
+        n = 1 < n ? 1 : n;
+        while( cur.next != null && !(i > n)) {
+            cur.next.prev = cur.prev;
+            cur.next.next = cur.next;
+            cur = cur.next;
+            i++;
+        }
+        this.current = cur;
+        return this.current
+    }
+
+    // 연결 리스트에서 n 노드만큼 뒤로 후진  (위치를 이동)
+    back(n = 1) {
+        let cur = this.current;
+        let i = 0;
+        n = 1 < n ? 1 : n;
+        while( cur.prev != null && !(i > n)) {
+            cur.prev.prev = cur.prev;
+            cur.prev.next = cur.next;
+            cur = cur.prev;
+            i++;
+        }
+        this.current = cur;
+        return this.current
+    }
+
+    // 현재 노드만 출력
+    show( node = null ) {
+        if ( node == null ) {
+            node = this.current;
+        }
+        console.log(node.element);
+    }
+
+}
+
+function LList() {
+    this.head = new Node('head');
+    this.find = find;
+    this.insert = insert;
+    this.display = display;
+    this.remove = remove;
+    this.findLast = findLast;
+    this.findPrevious = findPrevious;
+    this.dispReverse = dispReverse;
+}
+
+function dispReverse() {
+    var currNode = this.head;
+    currNode = this.findLast();
+    while (!(currNode.previous == null)) {
+        console.log(currNode.element);
+        currNode = currNode.previous;
+    }
+}
+
+function findLast() {
+    var currNode = this.head;
+    while (!(currNode.next == null)) {
+        currNode = currNode.next;
+    }
+    return currNode;
+}
+
+function remove(item) {
+    var currNode = this.find(item);
+    if (!(currNode.next == null)) {
+        currNode.previous.next = currNode.next;
+        currNode.next.previous = currNode.previous;
+        currNode.next = null;
+        currNode.previous = null;
+    }
+}
+
+//findPrevious는 더 이상 사용하지 않는다.
+function findPrevious(item) {
+    var currNode = this.head;
+    while (!(currNode.next == null) && (currNode.next.element != item)) {
+        currNode = currNode.next;
+    }
+    return currNode;
+}
+
+function display() {
+    var currNode = this.head;
+    while (!(currNode.next == null)) {
+        console.log(currNode.next.element);
+        currNode = currNode.next;
+    }
+}
+
+function find(item) {
+    var currNode = this.head;
+    while (currNode.element != item) {
+        currNode = currNode.next;
+    }
+    return currNode;
+}
+
+function insert(newElement, item) {
+    var newNode = new Node(newElement);
+    var current = this.find(item);
+    newNode.next = current.next;
+    newNode.previous = current;
+    current.next = newNode;
+}
+
+</script>
+
+</head>
+<body>
+
+</body>
+</html>
