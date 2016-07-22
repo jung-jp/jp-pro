@@ -8,13 +8,28 @@ import { DropTarget } from 'react-dnd';
 import Card from './Card';
 import constants from './constants';
 
+/**
+ * 드롭 대상 사양을 구현하는 일반 객체.
+ * 	- DropTarget : 메서드(모두 선택적)
+ *  - drop : 호환되는 항목이 드롭되면 호출.
+ *  - hover : 항목으로 컴포넌트를 가리키면 호출.
+ *  - canDrop : 드롭 대상이 항목을 수락할 수 있는지 여부를 지정하는 데 이용.
+ * @type {Object}
+ */
 const listTargetSpec = {
     hover(props, monitor) {
         const draggedId = monitor.getItem().id;
+        // console.log('draggedId : ', monitor.getItem().id);
         props.cardCallbacks.updateStatus(draggedId, props.id);
     }
 };
 
+/**
+ * 리액트 DnD 커넥터와 상태를 리액트 컴포넌트의 속성과 연결하는 함수.
+ * @param  {[type]} connect DropTargetConnector의 인스턴스, 드롭 대상 역할을 DOM 노드에 할당하는 데 이용
+ * @param  {[type]} monitor 드래그 앤 드롭 상태와 매필할 수 있게 해준다. (dnd는 상태저장 작업이다.)
+ * @return {[type]}         [description]
+ */
 function collect(connect, monitor) {
     return {
         connectDropTarget : connect.dropTarget()

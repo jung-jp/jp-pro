@@ -1,5 +1,6 @@
 import React from 'react';
-import update from 'react-addons-update';
+// import update from 'react-addons-update';
+import itable from 'immutable';
 import {throttle} from './utils';
 import KanbanBoard from './KanbanBoard';
 
@@ -12,7 +13,8 @@ import 'whatwg-fetch';
 const API_URL = 'http://kanbanapi.pro-react.com';
 const API_HEADERS = {
     'Content-type' : 'application/json',
-    Authorization: 'CHANGE THIS VALUE'
+    // 'Authorization': 'CHANGE THIS VALUE'
+    'Authorization': 'reactStudy'
     //Authorization : 'any-string-you-like' // 로컬 서버의 경우 권한 부여가 필요 없다.
 }
 
@@ -29,9 +31,11 @@ class KanbanBoardContainer extends React.Component {
     componentDidMount() {
         fetch(API_URL + '/cards', {headers:API_HEADERS})
         .then( response => {
+            console.log(response);
             return response.json();
         })
         .then( responseData => {
+            console.log(responseData);
             this.setState({cards : responseData});
             // console.log(responseData);
         })
@@ -49,11 +53,14 @@ class KanbanBoardContainer extends React.Component {
         let newTask = {id:Date.now(), name:taskName, done:false};
 
         // 새로운 객체를 생성하고 태스크의 배열로 새로운 태스크를 푸시한다.
-        let nextState = update(this.state.cards, {
-            [cardIndex] : {
-                tasks : { $push : [newTask] }
-            }
-        });
+        // let nextState = update(this.state.cards, {
+        //     [cardIndex] : {
+        //         tasks : { $push : [newTask] }
+        //     }
+        // });
+        //let nextState = his.state.cards.updateIn([cardIndex, tasks],
+
+        )
 
         // 변경된 객체로 컴포넌트 상태를 설정한다.
         this.setState({cards : nextState});
