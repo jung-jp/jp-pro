@@ -1,6 +1,6 @@
 import React from 'react';
-// import update from 'react-addons-update';
-import itable from 'immutable';
+import update from 'react-addons-update';
+import Immutable from 'immutable';
 import {throttle} from './utils';
 import KanbanBoard from './KanbanBoard';
 
@@ -13,8 +13,8 @@ import 'whatwg-fetch';
 const API_URL = 'http://kanbanapi.pro-react.com';
 const API_HEADERS = {
     'Content-type' : 'application/json',
-    // 'Authorization': 'CHANGE THIS VALUE'
-    'Authorization': 'reactStudy'
+    'Authorization': 'CHANGE THIS VALUE'
+    //'Authorization': 'reactStudy'
     //Authorization : 'any-string-you-like' // 로컬 서버의 경우 권한 부여가 필요 없다.
 }
 
@@ -31,11 +31,11 @@ class KanbanBoardContainer extends React.Component {
     componentDidMount() {
         fetch(API_URL + '/cards', {headers:API_HEADERS})
         .then( response => {
-            console.log(response);
+            console.log('response', response);
             return response.json();
         })
         .then( responseData => {
-            console.log(responseData);
+            console.log('responseData', responseData);
             this.setState({cards : responseData});
             // console.log(responseData);
         })
@@ -43,6 +43,7 @@ class KanbanBoardContainer extends React.Component {
     }
 
     addTask(cardId, taskName) {
+        console.log('::addTask::');
         // UI 변경을 되돌려야 하는 경우 대비, 변경하기 전 원래 상태에 대한 참조를 저장한다.
         let prevState = this.state;
 
@@ -58,9 +59,10 @@ class KanbanBoardContainer extends React.Component {
         //         tasks : { $push : [newTask] }
         //     }
         // });
-        //let nextState = his.state.cards.updateIn([cardIndex, tasks],
 
-        )
+        // 'cards' : updateData.get('cards').splice(afterIndex, 0, card).toJS()
+        let updateData = Immutable.fromJS(this.state).getIn(['cards', cardIndex, 'tasks']).push(newTask);
+        let nextState = Immutable.fromJS(this.state.cards).setIn([cardIndex, 'tasks'], updateData).toJS();
 
         // 변경된 객체로 컴포넌트 상태를 설정한다.
         this.setState({cards : nextState});
@@ -82,6 +84,7 @@ class KanbanBoardContainer extends React.Component {
         .then( res => {
             // 서버가 새로운 태스크를 추가하는 이용,
             // 확정 ID를 반환하면 리액트에서 ID를 업데이트 한다.
+            console.log(res);
             newTask.id = res.id;
             this.setState({cards:nextState});
         })
@@ -93,6 +96,7 @@ class KanbanBoardContainer extends React.Component {
     }
 
     deleteTask(cardId, taskId, taskIndex) {
+        console.log('::deleteTask::');
         // UI 변경을 되돌려야 하는 경우 대비
         let prevState = this.state;
 
@@ -100,14 +104,17 @@ class KanbanBoardContainer extends React.Component {
         let cardIndex = this.state.cards.findIndex( card => card.id == cardId );
 
         // 해당 태스트를 제외한 새로운 객체를  생성한다.
-        let nextState = update(this.state.cards, {
-            [cardIndex] : {
-                tasks : { $splice : [[taskIndex, 1]] }
-            }
-        });
-
+        //console.log('deleteTask :: ', this.state.cards);
+        // let nextState = update(this.state.cards, {
+        //     [cardIndex] : {
+        //         tasks : { $splice : [[taskIndex, 1]] }
+        //     }
+        // });
         // 변경된 객체로 컴포넌트 상태를 설정한다.
-        this.setState({cards : nextState});
+        // this.setState({cards : nextState});
+
+        let updateData = Immutable.fromJS(this.state).deleteIn(['cards', cardIndex, 'tasks', taskIndex]).toJS();
+        this.setState(updateData);
 
         // API를 호출해 서버에서 해당 태스크를 제거한다.
         fetch(`${API_URL}/cards/${cardId}/tasks/${taskId}`, {
@@ -121,12 +128,12 @@ class KanbanBoardContainer extends React.Component {
         }).catch( error => {
             Console.error('Fetch error : ', error);
             this.setState(prevState);
-        })
-        ;
+        });
+        console.log(2222);
     }
 
     toggleTask(cardId, taskId, taskIndex) {
-
+        console.log('::toggleTask::');
         let prevState = this.state;
 
         // 카드 인덱스를 찾는다.
@@ -135,22 +142,24 @@ class KanbanBoardContainer extends React.Component {
         // 태스트의 done 값에 대한 참조를 저장한다.
         let newDoneValue;
         // $apply 명열을 이용해 done 값을 현재와 반대로 변경한다.
-        let nextState = update(this.state.cards, {
-            [cardIndex] : {
-                tasks : {
-                    [taskIndex] : {
-                        done : { $apply : done => {
-                                newDoneValue = !done;
-                                return newDoneValue;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
+        // let nextState = update(this.state.cards, {
+        //     [cardIndex] : {
+        //         tasks : {
+        //             [taskIndex] : {
+        //                 done : { $apply : done => {
+        //                         newDoneValue = !done;
+        //                         return newDoneValue;
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // });
         // 변경된 객체로 컴포넌트 상태를 설정한다.
-        this.setState({cards : nextState});
+        // this.setState({cards : nextState});
+
+        let updateData = Immutable.fromJS(this.state).updateIn(['cards', cardIndex, 'tasks', taskIndex, 'done'], done => newDoneValue = !done).toJS();
+        this.setState(updateData);
 
         // API를 호출해 서버에서 해당 태스크를 제거한다.
         fetch(`${API_URL}/cards/${cardId}/tasks/${taskId}`, {
@@ -167,41 +176,53 @@ class KanbanBoardContainer extends React.Component {
     }
 
     updateCardStatus(cardId, listId) {
+        console.log('::updateCardStatus::');
         let cardIndex = this.state.cards.findIndex( card => card.id == cardId );
         let card = this.state.cards[cardIndex];
 
         if ( card.status !== listId ) {
-            this.setState( update(this.state, {
-                cards : {
-                    [cardIndex] : {
-                        status : {$set:listId}
-                    }
-                }
-            }));
+
+            let updateData = Immutable.fromJS(this.state).setIn(['cards', cardIndex, 'status'], listId);
+            this.setState(updateData.toJS());
+
+            // this.setState( update(this.state, {
+            //     cards : {
+            //         [cardIndex] : {
+            //             status : {$set:listId}
+            //         }
+            //     }
+            // }));
         }
     }
 
     updateCardPosition(cardId, afterId) {
+        console.log('::updateCardPosition::');
         if ( cardId !== afterId ) {
             let cardIndex = this.state.cards.findIndex( card => card.id == cardId );
             let card = this.state.cards[cardIndex];
             let afterIndex = this.state.cards.findIndex( card => card.id == afterId );
 
-            // splice를 이용해 카드를 제거한 후 새로운 인덱스 위치로 삽입한다.
-            this.setState(update(this.state, {
-                cards: {
-                    $splice : [
-                        [cardIndex, 1], [afterIndex, 0, card]
-                    ]
+            let updateData = Immutable.fromJS(this.state).deleteIn(['cards', cardIndex]);
+            this.setState(
+                {
+                    'cards' : updateData.get('cards').splice(afterIndex, 0, card).toJS()
                 }
-            }))
+            );
+
+            // this.setState(update(this.state, {
+            //     cards: {
+            //         $splice : [
+            //             [cardIndex, 1], [afterIndex, 0, card]
+            //         ]
+            //     }
+            // }))
         }
     }
 
     persistCardDrag(cardId, status) {
         let cardIndex = this.state.cards.findIndex( card => card.id == cardId );
         let card = this.state.cards[cardIndex];
-
+        console.log('persistCardDrag');
         fetch(`${API_URL}/cards/${cardId}`, {
             method : 'put',
             headers : API_HEADERS,
@@ -212,15 +233,17 @@ class KanbanBoardContainer extends React.Component {
             }
         }).catch( error => {
             console.error("error : " + error);
-            this.setState(
-                update(this.state, {
-                    cards : {
-                        [cardIndex] : {
-                            status : {$set:status}
-                        }
-                    }
-                })
-            );
+            let updateData = Immutable.fromJS(this.state).setIn(['cards', cardIndex, 'status'], status);
+            this.setState(updateData.toJS());
+            // this.setState(
+            //     update(this.state, {
+            //         cards : {
+            //             [cardIndex] : {
+            //                 status : {$set:status}
+            //             }
+            //         }
+            //     })
+            // );
         });
     }
 
