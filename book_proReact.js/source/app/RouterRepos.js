@@ -14,25 +14,30 @@ class Repos extends Component {
 
     componentDidMount() {
         fetch('https://api.github.com/users/pro-react/repos')
-        .then( res => res.json() )
+        .then( res => {
+            if ( res.ok ) {
+                return res.json();
+            } else {
+                throw new Error("Server response wasn`t OK");
+            }
+        })
         .then( data => this.setState({repositories:data}) )
+        .catch( error => this.props.history.pushState(null, 'error') )
         ;
     }
 
     render() {
-        let repos = this.state.repositories.map( repo => {
+        let repos = this.state.repositories.map( repo =>
+            <li key={repo.id}><Link to={"/repos/"+repo.name}>{repo.name}</Link></li>
+        );
 
-            return (
-                <li key={repo.id}>
-                    <Link to={"/repos/details/"+repo.name}>{repo.name}</Link>
-                </li>
-            );
-        });
+        let child = this.props.children && React.cloneElement(this.props.children, {repositories:this.state.repositories});
+
         return (
             <div>
-                <h1>Repos</h1>
+                <h1>Github Repos</h1>
                 <ul>{repos}</ul>
-                {this.props.children}
+                {child}
             </div>
         );
     }
