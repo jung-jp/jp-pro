@@ -1,7 +1,7 @@
 module.exports = {
     entry : [
         'babel-polyfill',
-        __dirname + '/app/RouterApp.js'
+        __dirname + '/app/App.js'
     ],
     output : {
         path : __dirname + '/public',

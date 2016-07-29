@@ -42,6 +42,77 @@ class KanbanBoardContainer extends React.Component {
         .catch( error => console.log('Error fetching and parsing data', error) )
     }
 
+    addCard(card) {
+        // 낙관적 UI변경을 되돌려야 하는 경우를 대비해 변경하기 전 원래 상태에 대한 참조 저장.
+        let prevState = this.state;
+
+        // 카드에 임시 id 부여
+        if ( card.id == null ) {
+            // let card = Object.assign({}, card, {id:Date.now()});
+            let card = Object.assign({}, card, {id:Date.now()});
+        }
+
+        // 개로운 객체를 생성하고 카드의 배열로 새로운 카드를 푸시.
+        let nextState = update(this.state.cards, {$push:[card]});
+        // let nextState = Immutable.fromJS(this.state.cards).push(card).toJS();
+
+        // 변경된 객체로 컴포넌트 상태를 설정한다.
+        this.setState({cards:nextState});
+
+        // API 호출해 서버에 카드를 추가
+        fetch(`${API_URL}/cards`, {
+            method : 'post',
+            headers : API_HEADERS,
+            body : JSON.stringify(card)
+        })
+        .then( res => {
+            if ( res.ok ) {
+                return res.json();
+            } else {
+                throw new Error('Server response wasn`t OK');
+            }
+        })
+        .then( data => {
+            card.id = data.id;
+            this.setState({cards:nextState});  //? 불변인데? 참조하고 있나??
+        })
+        .catch( error => this.setState(prevState) );
+    }
+
+    updateCard(card) {
+        // 낙관적 UI변경을 되돌려야 하는 경우를 대비해 변경하기 전 원래 상태에 대한 참조 저장.
+        let prevState = this.state;
+
+        // 카드의 인덱스 찾기
+        let cardIndex = this.state.cards.findIndex( cd => cd.id == card.id );
+
+        // $set 명령을 이용해 카드 전체를 변경.
+        let nextState = update(this.state.cards, {
+            [cardIndex]:{$set:card}
+        });
+
+        // let nextState = Immutable.fromJS(this.state.cards).setIn([cardIndex], card).toJS();
+
+        // 변경된 객체로 컴포넌트 상태를 설정한다.
+        this.setState({cards:nextState});
+
+        // API 호출해 서버에 카드를 추가
+        fetch(`${API_URL}/cards/${card.id}`, {
+            method : 'put',
+            headers : API_HEADERS,
+            body : JSON.stringify(card)
+        })
+        .then( res => {
+            if ( !res.ok ) {
+                throw new Error('Server response wasn`t OK');
+            }
+        })
+        .catch( error => {
+            console.error('Fetch error:', error);
+            this.setState(prevState) ;
+        });
+    }
+
     addTask(cardId, taskName) {
         console.log('::addTask::');
         // UI 변경을 되돌려야 하는 경우 대비, 변경하기 전 원래 상태에 대한 참조를 저장한다.
@@ -249,20 +320,36 @@ class KanbanBoardContainer extends React.Component {
 
     render() {
 
-        return (
-            <KanbanBoard cards={this.state.cards}
-                taskCallbacks={{
-                    toggle : this.toggleTask.bind(this),
-                    delete : this.deleteTask.bind(this),
-                    add : this.addTask.bind(this)
-                }}
-                cardCallbacks={{
-                    updateStatus:this.updateCardStatus,
-                    updatePosition:this.updateCardPosition,
-                    persistCardDrag:this.persistCardDrag.bind(this)
-                }}
-            />
-        );
+        let KanbanBoard = this.props.children && React.cloneElement(this.props.children, {
+            cards : this.state.cards,
+            taskCallbacks : {
+                toggle : this.toggleTask.bind(this),
+                delete : this.deleteTask.bind(this),
+                add : this.addTask.bind(this)
+            },
+            cardCallbacks : {
+                updateStatus:this.updateCardStatus,
+                updatePosition:this.updateCardPosition,
+                persistCardDrag:this.persistCardDrag.bind(this)
+            }
+        });
+
+        return KanbanBoard;
+
+        // return (
+        //     <KanbanBoard cards={this.state.cards}
+        //         taskCallbacks={{
+        //             toggle : this.toggleTask.bind(this),
+        //             delete : this.deleteTask.bind(this),
+        //             add : this.addTask.bind(this)
+        //         }}
+        //         cardCallbacks={{
+        //             updateStatus:this.updateCardStatus,
+        //             updatePosition:this.updateCardPosition,
+        //             persistCardDrag:this.persistCardDrag.bind(this)
+        //         }}
+        //     />
+        // );
     }
 }
 

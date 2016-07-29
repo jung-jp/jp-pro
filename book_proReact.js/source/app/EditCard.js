@@ -36,3 +36,5 @@ class EditCard extends Component {
 EditCard.propTypes = {
     cardCallbacks:PropTypes.object
 }
+
+export default EditCard;

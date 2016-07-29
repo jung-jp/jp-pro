@@ -210,7 +210,6 @@ ul {
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
 }
 
-
 /*
 input {padding:5px;width:120px;margin-top:10px;}
 .item{background-color:#efefef;cursor:pointer;display:block;margin-bottom:1px;padding:8px 12px;width:120px;}
@@ -245,7 +244,7 @@ input {padding:5px;width:120px;margin-top:10px;}
 */
 
 /* router */
-
+/*
 menu ul{
   margin: 0;
   padding: 0;
@@ -271,4 +270,4 @@ menu {
   padding: 5px;
   margin-top: 0;
   margin-bottom: 10px;
-}
+}*/

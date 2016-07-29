@@ -11,15 +11,16 @@ class CardForm extends Component {
     }
 
     render() {
+        return (
         <div>
             <div className="card big">
                 <form onSubmit={this.props.handleSubmit.bind(this)}>
                     <input type="text" value={this.props.draftCard.title}
                         onChange={this.handleChange.bind(this, 'title')}
-                        placeholder="Title" required={true} autoFocus={true} />
+                        placeholder="Title" required={true} autoFocus={true} /><br/>
                     <textarea value={this.props.draftCard.description}
                         onChange={this.handleChange.bind(this, 'description')}
-                        placeholder="Description" required={true} />
+                        placeholder="Description" required={true} /><br/>
                     <label htmlFor="status">Status</label>
                     <select id="status" value={this.props.draftCard.status}
                         onChange={this.handleChange.bind(this, 'status')} >
@@ -39,6 +40,7 @@ class CardForm extends Component {
             </div>
             <div className="overlay" onClick={this.handleClose.bind(this)}></div>
         </div>
+        );
     }
 }
 

@@ -48,7 +48,7 @@ render((
         <Route path="about" component={About} title="About Us"/>
         <Route path="repos" component={Repos} >
             {/* UI를 중첩하려는 위치에 라우트를 중첩해 추가한다.*/}
-            <Route path="/repo/:repo_name" component={RepoDetails} />
+            <Route path="/repos/:repo_name" component={RepoDetails} />
         </Route>
         <Route path="error" component={ServerError} />
     </Route>

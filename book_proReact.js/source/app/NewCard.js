@@ -4,7 +4,7 @@ import CardForm from './CardForm';
 class NewCard extends Component {
     componentWillMount() {
         this.setState({
-            id:Date.new(),
+            id:Date.now(),
             title:'',
             description:'',
             status:'todo',
@@ -41,3 +41,5 @@ class NewCard extends Component {
 NewCard.propTypes = {
     cardCallbacks:PropTypes.object
 }
+
+export default NewCard;
