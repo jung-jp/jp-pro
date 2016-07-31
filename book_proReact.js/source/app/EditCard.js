@@ -1,10 +1,11 @@
 import React,{Component, PropTypes} from 'react';
+import { browserHistory } from 'react-router'
 import CardForm from './CardForm';
 
 class EditCard extends Component {
     componentWillMount() {
-        let card = this.props.cards.find( card => card.id == this.props.params.card_id );
-        this.setState(...card);
+        let card = this.props.cards.find( card => card.id.toString() == this.props.params.card_id );
+        this.setState(Object.assign({}, card));
     }
 
     handleChange(field, value) {
@@ -13,13 +14,12 @@ class EditCard extends Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        // this.props.cardCallbacks.updateCard(this.state);
-        this.props.cardCallbacks.updateStatus(this.state);
-        this.props.history.pushState(null, '/');
+        this.props.cardCallbacks.updateCard(this.state);
+        browserHistory.push('/');
     }
 
     handleClose(e) {
-        this.props.history.pushState(null, '/');
+        browserHistory.push('/');
     }
 
     render() {

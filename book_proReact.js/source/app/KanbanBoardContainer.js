@@ -13,8 +13,8 @@ import 'whatwg-fetch';
 const API_URL = 'http://kanbanapi.pro-react.com';
 const API_HEADERS = {
     'Content-type' : 'application/json',
-    'Authorization': 'CHANGE THIS VALUE'
-    //'Authorization': 'reactStudy'
+    //'Authorization': 'CHANGE THIS VALUE'
+    'Authorization': 'reactStudy'
     //Authorization : 'any-string-you-like' // 로컬 서버의 경우 권한 부여가 필요 없다.
 }
 
@@ -35,9 +35,7 @@ class KanbanBoardContainer extends React.Component {
             return response.json();
         })
         .then( responseData => {
-            console.log('responseData', responseData);
             this.setState({cards : responseData});
-            // console.log(responseData);
         })
         .catch( error => console.log('Error fetching and parsing data', error) )
     }
@@ -330,6 +328,8 @@ class KanbanBoardContainer extends React.Component {
             cardCallbacks : {
                 updateStatus:this.updateCardStatus,
                 updatePosition:this.updateCardPosition,
+                addCard : this.addCard.bind(this),
+                updateCard : this.updateCard.bind(this),
                 persistCardDrag:this.persistCardDrag.bind(this)
             }
         });

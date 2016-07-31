@@ -1,4 +1,5 @@
 import React,{Component, PropTypes} from 'react';
+import { browserHistory } from 'react-router'
 import CardForm from './CardForm';
 
 class NewCard extends Component {
@@ -20,11 +21,11 @@ class NewCard extends Component {
     handleSubmit(e) {
         e.preventDefault();
         this.props.cardCallbacks.addCard(this.state);
-        this.props.history.pushState(null, '/');
+        browserHistory.push('/');
     }
 
     handleClose(e) {
-        this.props.history.pushState(null, '/');
+        browserHistory.push('/');
     }
 
     render() {

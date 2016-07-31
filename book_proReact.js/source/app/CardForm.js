@@ -11,6 +11,7 @@ class CardForm extends Component {
     }
 
     render() {
+        let defaultColor =  this.props.draftCard.color || '#f00';
         return (
         <div>
             <div className="card big">
@@ -30,9 +31,9 @@ class CardForm extends Component {
                     </select>
                     <br/>
                     <label htmlFor="color">Color</label>
-                    <input id="color" value={this.props.draftCard.color}
+                    <input id="color" value={defaultColor}
                         onChange={this.handleChange.bind(this, 'color')}
-                        type="color" defaultValue="#f00"/>
+                        type="color"/>
                     <div className="action">
                         <button type="submit">{this.props.buttonLabel}</button>
                     </div>
