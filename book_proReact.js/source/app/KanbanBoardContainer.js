@@ -51,8 +51,8 @@ class KanbanBoardContainer extends React.Component {
         }
 
         // 개로운 객체를 생성하고 카드의 배열로 새로운 카드를 푸시.
-        let nextState = update(this.state.cards, {$push:[card]});
-        // let nextState = Immutable.fromJS(this.state.cards).push(card).toJS();
+        //let nextState = update(this.state.cards, {$push:[card]});
+         let nextState = Immutable.fromJS(this.state.cards).push(card).toJS();
 
         // 변경된 객체로 컴포넌트 상태를 설정한다.
         this.setState({cards:nextState});
@@ -85,11 +85,10 @@ class KanbanBoardContainer extends React.Component {
         let cardIndex = this.state.cards.findIndex( cd => cd.id == card.id );
 
         // $set 명령을 이용해 카드 전체를 변경.
-        let nextState = update(this.state.cards, {
-            [cardIndex]:{$set:card}
-        });
-
-        // let nextState = Immutable.fromJS(this.state.cards).setIn([cardIndex], card).toJS();
+        // let nextState = update(this.state.cards, {
+        //     [cardIndex]:{$set:card}
+        // });
+         let nextState = Immutable.fromJS(this.state.cards).setIn([cardIndex], card).toJS();
 
         // 변경된 객체로 컴포넌트 상태를 설정한다.
         this.setState({cards:nextState});
