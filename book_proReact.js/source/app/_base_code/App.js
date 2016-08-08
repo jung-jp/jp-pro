@@ -5,10 +5,10 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 import { Router, Route, browserHistory } from 'react-router';
-import KanbanBoardContainer from './componets/KanbanBoardContainer';
-import KanbanBoard from './componets/KanbanBoard';
-import EditCard from './componets/EditCard';
-import NewCard from './componets/NewCard';
+import KanbanBoardContainer from './KanbanBoardContainer';
+import KanbanBoard from './KanbanBoard';
+import EditCard from './EditCard';
+import NewCard from './NewCard';
 
 
 ReactDom.render((
