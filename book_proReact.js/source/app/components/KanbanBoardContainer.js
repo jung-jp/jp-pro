@@ -263,7 +263,14 @@ class KanbanBoardContainer extends React.Component {
         return KanbanBoard;
     }
 
-    KanbanBoardContainer.getStores = _ => ([CardStore]);
+    /**
+     * 컨테이너 고차 함수는 플럭스 유틸의 스토어를 확장하는 스토어에만 이용할 수 있다.
+     * calculateState : 스토어 상태와 로컬 컴포넌트의 상태를 매핑.
+     * getStores : 컴포넌트가 수신하는 모든 스토어의 배열을 반환.
+     */
+
+    KanbanBoardContainer.getStores = _ => ([C
+        ardStore]);
     KanbanBoardContainer.calculateState = prevState => ({cards : CardStore.getState()});
 }
 
