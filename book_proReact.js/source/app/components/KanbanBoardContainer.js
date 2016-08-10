@@ -269,8 +269,7 @@ class KanbanBoardContainer extends React.Component {
      * getStores : 컴포넌트가 수신하는 모든 스토어의 배열을 반환.
      */
 
-    KanbanBoardContainer.getStores = _ => ([C
-        ardStore]);
+    KanbanBoardContainer.getStores = _ => ([CardStore]);
     KanbanBoardContainer.calculateState = prevState => ({cards : CardStore.getState()});
 }
 
