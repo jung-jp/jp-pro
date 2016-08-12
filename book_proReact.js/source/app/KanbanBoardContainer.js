@@ -13,8 +13,8 @@ import 'whatwg-fetch';
 const API_URL = 'http://kanbanapi.pro-react.com';
 const API_HEADERS = {
     'Content-type' : 'application/json',
-    //'Authorization': 'CHANGE THIS VALUE'
-    'Authorization': 'reactStudy'
+    'Authorization': 'CHANGE THIS VALUE'
+    //'Authorization': 'reactStudy'
     //Authorization : 'any-string-you-like' // 로컬 서버의 경우 권한 부여가 필요 없다.
 }
 
