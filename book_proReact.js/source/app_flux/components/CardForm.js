@@ -11,13 +11,11 @@ class CardForm extends Component {
     }
 
     render() {
-        let defaultColor =  this.props.draftCard.color || '#f00';
-
         return (
         <div>
             <div className="card big">
                 <form onSubmit={this.props.handleSubmit.bind(this)}>
-                    <input type="text" value={this.props.draftCard.title}
+                    <input type="text" value={this.props.draftCard.title || ''}
                         onChange={this.handleChange.bind(this, 'title')}
                         placeholder="Title" required={true} autoFocus={true} /><br/>
                     <textarea value={this.props.draftCard.description}
@@ -32,7 +30,7 @@ class CardForm extends Component {
                     </select>
                     <br/>
                     <label htmlFor="color">Color</label>
-                    <input id="color" type="color" value={defaultColor}
+                    <input id="color" type="color" value={this.props.draftCard.color || '#f00'}
                         onChange={this.handleChange.bind(this, 'color')} />
                     <div className="action">
                         <button type="submit">{this.props.buttonLabel}</button>

@@ -52,7 +52,7 @@ let KanbanApi = {
         )
     },
 
-    addTask(cardIid,task) {
+    addTask(cardId,task) {
         return (
             fetch(`${API_URL}/cards/${cardId}/tasks`, {
                 headers : API_HEADERS,
