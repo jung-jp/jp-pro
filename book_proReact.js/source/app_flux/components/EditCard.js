@@ -19,7 +19,7 @@ class EditCard extends Component {
     handleSubmit(e) {
         e.preventDefault();
         let card = CardStore.getCard(this.props.params.card_id);
-        CardActionCreators.updateCard(card, this.state);
+        CardActionCreators.updateCard(card, this.state.draft);
         browserHistory.push('/');
     }
 

@@ -82,14 +82,14 @@ class CardStore extends ReduceStore {
             case constants.UPDATE_CARD :
                 cardIndex = this.getCardIndex(action.payload.card.id);
                 return update(this.getState(), {
-                    [cardIndex] : {$set:[action.payload.draftCard]}
+                    [cardIndex] : { $set : action.payload.draftCard }
                 });
                 break;
 
             case constants.UPDATE_CARD_ERROR :
                 cardIndex = this.getCardIndex(action.payload.card.id);
                 return update(this.getState(), {
-                    [cardIndex] : {$set:[action.payload.card]}
+                    [cardIndex] : { $set : action.payload.card}
                 });
                 break;
 
@@ -105,7 +105,7 @@ class CardStore extends ReduceStore {
                 }
 
                 return this.getState();
-                
+
                 break;
 
             case constants.UPDATE_CARD_STATUS :
@@ -184,11 +184,7 @@ class CardStore extends ReduceStore {
                     [cardIndex] : {
                         tasks : {
                             [action.payload.taskIndex] : {
-                                done : { $apply : done => {
-                                        newDoneValue = !done;
-                                        return newDoneValue;
-                                    }
-                                }
+                                done : { $apply : done => !done }
                             }
                         }
                     }

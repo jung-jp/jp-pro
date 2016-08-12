@@ -18,7 +18,7 @@ let TaskActionCreators = {
     },
 
     toggleTask(cardId, task, taskIndex) {
-        let promise = KanbanApi.toogleTask(cardId, task);
+        let promise = KanbanApi.toggleTask(cardId, task);
         let type = {request : constants.TOGGLE_TASK, success : constants.TOGGLE_TASK_SUCCESS, failure : constants.TOGGLE_TASK_ERROR};
         let payload = {cardId, task, taskIndex}
         AppDispatcher.dispatchAsync(promise, type, payload);

@@ -17,7 +17,7 @@ class NewCard extends Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        CardActionCreators.addCard(this.state);
+        CardActionCreators.addCard(this.state.draft);
         browserHistory.push('/');
     }
 

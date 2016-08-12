@@ -7,9 +7,7 @@ import CardStore from '../stores/CardStore';
 let CardActionCreators = {
 
     fetchCards() {
-        console.log('fetch cards');
         let promise = KanbanApi.fetchCards();
-        console.log('fetch cards promise');
         let type = {request : constants.FETCH_CARDS, success : constants.FETCH_CARDS_SUCCESS, failure : constants.FETCH_CARDS_ERROR};
         let payload = {}
         AppDispatcher.dispatchAsync(promise, type, payload);
@@ -29,7 +27,7 @@ let CardActionCreators = {
         AppDispatcher.dispatchAsync(promise, type, payload);
     },
 
-    updateCard(card) {
+    updateCard(card, draftCard) {
         let promise = KanbanApi.updateCard(card, draftCard);
         let type = {request : constants.UPDATE_CARD, success : constants.UPDATE_CARD_SUCCESS, failure : constants.UPDATE_ERROR};
         let payload = {card, draftCard}
@@ -71,7 +69,7 @@ let CardActionCreators = {
     updateDraft(field, value) {
         AppDispatcher.dispatch({
             type : constants.UPDATE_DRAFT,
-            payload : {card}
+            payload : {field, value}
         });
     },
 };

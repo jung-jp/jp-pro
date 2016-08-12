@@ -12,7 +12,10 @@ const API_HEADERS = {
 let KanbanApi = {
     fetchCards() {
         return (
-            fetch(API_URL + '/cards', {headers:API_HEADERS})
+            fetch(API_URL + '/cards', {
+                headers:API_HEADERS,
+                method : 'get'
+            })
             .then( res => res.json() )
         )
     },
@@ -30,7 +33,7 @@ let KanbanApi = {
 
     updateCard(card, draftCard) {
         return (
-            fetch(API_URL + '/cards', {
+            fetch(`${API_URL}/cards/${card.id}`, {
                 headers : API_HEADERS,
                 method : 'put',
                 body : JSON.stringify(draftCard)
@@ -39,9 +42,9 @@ let KanbanApi = {
         )
     },
 
-    persistCardDrag(cardIid, status, index) {
+    persistCardDrag(cardId, status, index) {
         return (
-            fetch(API_URL + '/cards', {
+            fetch(`${API_URL}/cards/${cardId}`, {
                 headers : API_HEADERS,
                 method : 'put',
                 body : JSON.stringify({status, row_order_position:index})
