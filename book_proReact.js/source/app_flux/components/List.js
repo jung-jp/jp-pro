@@ -15,7 +15,7 @@ import CardActionCreators from '../actions/CardActionCreators';
 const listTargetSpec = {
     hover(props, monitor) {
         const draggedId = monitor.getItem().id;
-        props.CardActionCreators.updateCardStatus(draggedId, props.id);
+        CardActionCreators.updateCardStatus(draggedId, props.id);
     }
 };
 

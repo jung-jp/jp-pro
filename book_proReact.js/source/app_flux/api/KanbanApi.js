@@ -4,8 +4,8 @@ import 'babel-polyfill';
 const API_URL = 'http://kanbanapi.pro-react.com';
 const API_HEADERS = {
     'Content-type' : 'application/json',
-    //'Authorization': 'CHANGE THIS VALUE'
-    'Authorization': 'reactStudy'
+    'Authorization': 'CHANGE THIS VALUE'
+    //'Authorization': 'reactStudy'
 }
 
 
@@ -65,7 +65,7 @@ let KanbanApi = {
             fetch(`${API_URL}/cards/${cardId}/tasks/${task.id}`, {
                 headers : API_HEADERS,
                 method : 'delete',
-            });
+            })
         )
     },
 
@@ -74,8 +74,8 @@ let KanbanApi = {
             fetch(`${API_URL}/cards/${cardId}/tasks/${task.id}`, {
                 headers : API_HEADERS,
                 method : 'put',
-                body : JSON.stringify({done:!task.done});
-            });
+                body : JSON.stringify({done:!task.done})
+            })
         )
     }
 
@@ -83,4 +83,4 @@ let KanbanApi = {
 
 };
 
-export default kanbanApi
+export default KanbanApi

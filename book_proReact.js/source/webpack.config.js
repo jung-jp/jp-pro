@@ -1,7 +1,7 @@
 module.exports = {
     entry : [
         'babel-polyfill',
-        __dirname + '/app/App.js'
+        __dirname + '/app_flux/App.js'
     ],
     output : {
         path : __dirname + '/public',

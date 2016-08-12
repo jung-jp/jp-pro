@@ -95,16 +95,17 @@ class CardStore extends ReduceStore {
 
             // task dnd
             case constants.UPDATE_CARD_POSITION :
-                if ( action.payload.cardId === action.payload.afterId ) {
-                    return ;
+                if ( action.payload.cardId !== action.payload.afterId ) {
+                    cardIndex = this.getCardIndex(action.payload.cardId);
+                    let card = this.getState()[cardIndex];
+                    let afterIndex = this.getCardIndex(action.payload.afterId);
+                    return update(this.getState(), {
+                        $splice : [[cardIndex, 1], [afterIndex, 0, card]]
+                    });
                 }
 
-                cardIndex = this.getCardIndex(action.payload.cardId);
-                let card = this.getState()[cardIndex];
-                let afterIndex = this.getCardIndex(action.payload.afterId);
-                return update(this.getState(), {
-                    $splice : [cardIndex, 1], [afterIndex, 0, card]
-                });
+                return this.getState();
+                
                 break;
 
             case constants.UPDATE_CARD_STATUS :
@@ -193,6 +194,7 @@ class CardStore extends ReduceStore {
                     }
                 });
                 break;
+
             case constants.TOGGLE_TASK_ERROR :
                 return this.getState();
                 break;

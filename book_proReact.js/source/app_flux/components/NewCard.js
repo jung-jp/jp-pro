@@ -1,5 +1,6 @@
 import React,{Component, PropTypes} from 'react';
 import { browserHistory } from 'react-router'
+import {Container} from 'flux/utils';
 import CardForm from './CardForm';
 import DraftStore from '../stores/DraftStore';
 import CardActionCreators from '../actions/CardActionCreators';

@@ -35,7 +35,7 @@ const cardDragSpec = {
 
 const cardDropSpec = {
     hover(props, monitor) {
-        CardActionCreators.updatePosition(monitor.getItem().id, props.id);
+        CardActionCreators.updateCardPosition(monitor.getItem().id, props.id);
     }
 }
 
@@ -71,16 +71,12 @@ class Card extends Component
             backgroundColor : this.props.color
         };
 
-        if ( this.props.showDetails !== false ) {
+        if ( !!this.props.showDetails ) {
             cardDetails = (
                 <div className="card__details">
                     <span dangerouslySetInnerHTML={{__html:marked(this.props.description)}} />
                     {/*this.props.description*/}
-                    <CheckList
-                        cardId={this.props.id}
-                        tasks={this.props.tasks}
-                        taskCallbacks={this.props.taskCallbacks}
-                    />
+                    <CheckList cardId={this.props.id} tasks={this.props.tasks} />
                 </div>
             );
         }
@@ -88,7 +84,7 @@ class Card extends Component
             <div className="card">
                 <div style={sideColor} />
                 <div className="card__edit"><Link to={'/edit/'+this.props.id}>&#9998;</Link></div>
-                <div className={this.props.showDetails ? "card__title card__title--is-open" : "card__title"}
+                <div className={ !!this.props.showDetails ? "card__title card__title--is-open" : "card__title"}
                     onClick={this.toggleDetails.bind(this)}>
                     {this.props.title}
                 </div>

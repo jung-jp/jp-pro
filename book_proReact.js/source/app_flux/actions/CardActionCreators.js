@@ -1,13 +1,15 @@
 import AppDispatcher from '../AppDispatcher';
 import constants from '../constants';
-import KanbanApi from '../KanbanApi';
+import KanbanApi from '../api/KanbanApi';
 import {throttle} from '../utils';
 import CardStore from '../stores/CardStore';
 
 let CardActionCreators = {
 
     fetchCards() {
-        let promise = KanbanAPI.fetchCards();
+        console.log('fetch cards');
+        let promise = KanbanApi.fetchCards();
+        console.log('fetch cards promise');
         let type = {request : constants.FETCH_CARDS, success : constants.FETCH_CARDS_SUCCESS, failure : constants.FETCH_CARDS_ERROR};
         let payload = {}
         AppDispatcher.dispatchAsync(promise, type, payload);
@@ -21,43 +23,44 @@ let CardActionCreators = {
     },
 
     addCard(card) {
-        let promise = KanbanAPI.addCard(card);
+        let promise = KanbanApi.addCard(card);
         let type = {request : constants.CREATE_CARD, success : constants.CREATE_CARD_SUCCESS, failure : constants.CREATE_ERROR};
         let payload = {card}
         AppDispatcher.dispatchAsync(promise, type, payload);
     },
 
     updateCard(card) {
-        let promise = KanbanAPI.updateCard(card, draftCard);
+        let promise = KanbanApi.updateCard(card, draftCard);
         let type = {request : constants.UPDATE_CARD, success : constants.UPDATE_CARD_SUCCESS, failure : constants.UPDATE_ERROR};
         let payload = {card, draftCard}
         AppDispatcher.dispatchAsync(promise, type, payload);
     },
 
-    updateCardStatus : throttle( cardId, listId ) => {
+    updateCardStatus : throttle( (cardId, listId)  => {
         AppDispatcher.dispatch( {
             type : constants.UPDATE_CARD_STATUS,
             payload : {cardId, listId}
         });
     }),
 
-    updateCardPosition : throttle( cardId, afterId ) => {
+    updateCardPosition : throttle( (cardId, afterId)  => {
         AppDispatcher.dispatch( {
             type : constants.UPDATE_CARD_POSITION,
             payload : {cardId, afterId}
-        }, 500);
-    }),
+        });
+    }, 500),
 
     persistCardDrag(cardProps) {
         let card = CardStore.getCard(cardProps.id);
         let cardIndex = CardStore.getCardIndex(cardProps.id);
 
-        let promise = KanbanAPI.persistCardDrag(card.id, card.status, cardIndex);
+        let promise = KanbanApi.persistCardDrag(card.id, card.status, cardIndex);
         let type = {request : constants.PERSIST_CARD_DRAG, success : constants.PERSIST_CARD_DRAG_SUCCESS, failure : constants.PERSIST_CARD_DRAG_ERROR};
         let payload = {cardProps}
 
         AppDispatcher.dispatchAsync(promise, type, payload);
-    }
+    },
+
     createDraft(card) {
         AppDispatcher.dispatch({
             type : constants.CREATE_DRAFT,
