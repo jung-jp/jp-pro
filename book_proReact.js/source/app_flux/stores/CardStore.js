@@ -131,7 +131,7 @@ class CardStore extends ReduceStore {
                 cardIndex = this.getCardIndex(action.payload.cardId);
                 return update(this.getState(), {
                     [cardIndex] : {
-                        task : { $push : action.payload.task }
+                        tasks : { $push : [action.payload.task] }
                     }
                 });
                 break;
