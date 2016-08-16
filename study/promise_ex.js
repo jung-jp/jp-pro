@@ -12,7 +12,7 @@ var _promise = function(param) {
 
 _promise(true)
 .then(function(text) {
-    //성공일대
+    //성공일때
     console.log(text);
 }), function(error) {
     console.error(error);
