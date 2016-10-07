@@ -1,0 +1,347 @@
+@CHARSET "EUC-KR";
+/* @import url("http://fonts.googleapis.com/earlyaccess/nanumgothic.css"); */
+button::-moz-focus-inner, input::-moz-focus-inner{padding:0; border:0;}
+
+#sidebar{width:165px;background:none;zoom:1;padding-bottom:80px}
+.sidebar-left-cell {width:165px;background:url('//www.saraminimage.co.kr/ui/common/side_bar_bg.png') right top repeat-y;padding-right:0px;}
+.sidebar-left-cell2 {float:left;width:165px;padding-right:0px;}
+.speed_search {float:left;margin-top:35px !important;}
+#content {position: relative;float:right ;overflow-x: hidden;padding-bottom:16px;}
+.content_typea {overflow:hidden;width:740px;min-height:800px;}
+.content_typeb {overflow:hidden;width:695px;margin-right:45px;}
+.content_typec {overflow:hidden;width:860px;margin:0 auto;}
+.google-adsense {margin-bottom:80px !important;}
+.adsense_no_style {position:relative;margin:50px auto;text-align: center;}
+.google-adsense.doctype { margin: 20px 0 80px !important; text-align: center;}
+.timeline-wrap {top:283px !important;}
+
+/* width: 774px ·¹ÀÌ¾Æ¿ô */
+#container.container{ width: 960px;}
+#container.container .header{ clear: both; position: relative; z-index: 99;width: 100%; height: 108px; text-align: left; font-family: verdana;background: none;}
+#container.container .gnb{ width: 100%; background-image: url(//www.saraminimage.co.kr/layout/bg_gnb_sbar.png);}
+#container.container .footer{ width: 100%;}
+#container.container .area_left_wing{ right: auto; left: -134px;}
+#container.container #alba_list{ width: 100% !important;}
+#bebob_search.sub{left:270px}
+#content_wrap.content-wrap{ overflow: hidden;position:relative;width:960px;background:url(//www.saraminimage.co.kr/ui/left_navi/lnb_bg_line.png) 1px 0 repeat-y;*background-position:1px 0;}
+#content_wrap.content-wrap.no-sidebar{overflow:hidden;position:relative;background:none;}
+#content_wrap.content-wrap.no-sidebar.content_type_774 { width:774px; margin: auto;}
+#content_wrap.content-wrap .section_sidebar{ float: left; position: relative;margin-right: 21px; width: 165px;}
+#content_wrap.content-wrap .section_content{ overflow: visible;float: left; position: relative;width: 774px;}
+#content_wrap.content-wrap .section_content .google-banner{ margin: 35px auto; width: 728px;_width: auto; _text-align: center;}
+#content_wrap.content-wrap .section_content table th{ font-weight: bold;}
+/* width: 960px ·¹ÀÌ¾Æ¿ô */
+#content.contents_type_960{float:none !important;}
+/* width: 960px ·¹ÀÌ¾Æ¿ô */
+/* width: 774px LNB ¾ø´Â ·¹ÀÌ¾Æ¿ô ÇÕ°Ý½ºÆå */
+#content_wrap.no-sidebar{ overflow: hidden;position:relative;background:none;}
+#content_wrap.no-sidebar.content_type_774 { width:774px; margin: auto;}
+/* width: 774px LNB ¾ø´Â ·¹ÀÌ¾Æ¿ô ÇÕ°Ý½ºÆå */
+/* »ó´Ü title */
+.tit_area{overflow:hidden;position:relative;width:100%;height:63px;}
+.tit_area + .tit_promoapp_nudge{margin-top: 9px;}
+.tit_area.height_auto{height:127px;}
+.tit_area .wrap_button{position: absolute;top: 30px;right: 0;z-index: 12;font: 0/0 Arial;}
+.tit_area .tit_img_area{position: absolute;top:0px;right:0;}
+.tit_area .tit_img_area img{vertical-align:baseline;}
+.tit_area .tit_btn_area{position: absolute;top:20px;right:0;}
+.tit_area .tit_btn_area ul li {float:left;margin-right:5px;}
+.tit_area .tit_btn_area ul li.last {margin-right:0;}
+.tit_area .tit_txt_area{position: absolute;top:27px;*top:28px;right:0;font-size:11px;color:#737373;font-family:"¸¼Àº °íµñ",gulim,"µ¸¿ò","dotum",sans-serif;}
+.tit_area h2{z-index: 11; margin:0; padding:0; height:44px;font-family:"¸¼Àº °íµñ",gulim,"µ¸¿ò","dotum";font-size:36px;letter-spacing:-4px;word-spacing:-1px;font-weight:normal;text-align:left;line-height:36px;color:#444;}
+.tit_area.height_auto h2{font-size:26px;}
+.tit_area h2.tbl {top:40px;*top:42px;}
+.tit_area h2 span {position:relative;top:-3px;font-size:28px;}
+.tit_area #flash_content{position:absolute;top:14px;right:0;width:693px;}
+
+/* »ó´Ü ÅÇ(5in1)&µð½ºÅ©¸³¼Ç */
+ul.tab_spc_recruit{ height:38px; margin-bottom:25px; border-top:1px solid #eaeaea; border-bottom:1px solid #000000; text-align: center; letter-spacing: -1px; }
+ul.tab_spc_recruit li{ float:left; width:138px; height:38px; font-family:Malgun gothic,"¸¼Àº °íµñ",gulim,"µ¸¿ò","dotum"; font-size: 12px; color: #444444; line-height:36px; background:url("//www.saraminimage.co.kr/ui/recruit/bg/bg_tab_divi01.png") no-repeat right 14px; }
+ul.tab_spc_recruit li.typ_all{ width:141px; }
+ul.tab_spc_recruit li.typ_giant{ width:140px; background: none; }
+ul.tab_spc_recruit li.typ_all_select,
+ul.tab_spc_recruit li.typ_venture_select,
+ul.tab_spc_recruit li.typ_mainbiz_select,
+ul.tab_spc_recruit li.typ_innobiz_select,
+ul.tab_spc_recruit li.typ_giant_select{ position: relative; height:39px; _height:40px; margin:-1px; border:1px solid #000000; border-bottom:none; font-size: 16px; font-weight: bold; background: #fff none; }
+ul.tab_spc_recruit li.typ_all_select{ margin-left: 0; width:140px; }
+ul.tab_spc_recruit li.typ_giant_select{ margin-right: 0; width:139px; _width:141px; }
+.page_desc01{ margin-top:-6px;  padding:0 0 17px 30px; font-family:Malgun gothic,"¸¼Àº °íµñ",gulim,"µ¸¿ò","dotum"; line-height:23px; letter-spacing: -1px; }
+.page_desc01 dt{ font-size: 14px; color: #444444; font-weight: bold; }
+.page_desc01 dt strong.point1{ color: #425bd5; }
+.page_desc01 dd{ font-size: 12px; color: #666666; }
+.page_desc01 dd a.btn_info_detail { display: inline-block; margin-top:-1px; margin-left:15px; vertical-align: middle; cursor:pointer; }
+.page_desc01 dd a.btn_info_detail:nth-child(2){ margin-left:5px; }
+
+.gang-wrap{position:relative; }
+.gang-stnd{position:absolute;top:173px;right:0;width:420px; background-color: #fff; }
+.gang-stnd .gang-stnd-wrap{padding:15px 20px 16px; border:1px solid #666666; }
+.gang-stnd .gang-close{position:absolute;top:11px;right:11px; cursor:pointer; }
+.gang-stnd dl{font-family:Malgun gothic,"¸¼Àº °íµñ",gulim,"µ¸¿ò","dotum"; line-height:20px; letter-spacing:-1px; }
+.gang-stnd dl dt{padding-bottom: 5px; font-size:12px;font-weight:bold;color:#444444;}
+.gang-stnd dl dd{font-size:11px; color:#666;}
+
+/* °íÁ¹Ã¤¿ë¼Óº¸ ÅÇ 4in1 */
+ul.tab_spc_highschool{ height:38px; margin-bottom:25px; border-top:1px solid #eaeaea; border-bottom:1px solid #000000; text-align: center; letter-spacing: -1px; }
+ul.tab_spc_highschool li{ float:left; width:173px; height:38px; font-family:Malgun gothic,"¸¼Àº °íµñ",gulim,"µ¸¿ò","dotum"; font-size: 12px; color: #444444; line-height:36px; background:url("//www.saraminimage.co.kr/ui/recruit/bg/bg_tab_divi01.png") no-repeat right 14px; }
+ul.tab_spc_highschool li a { display: block; height:38px; }
+ul.tab_spc_highschool li.typ01{ width:176px; }
+ul.tab_spc_highschool li.typ04{ background: none; }
+ul.tab_spc_highschool li.typ01_select,
+ul.tab_spc_highschool li.typ02_select,
+ul.tab_spc_highschool li.typ03_select,
+ul.tab_spc_highschool li.typ04_select{ position: relative; height:39px; _height:40px; margin:-1px; border:1px solid #000000; border-bottom:none; font-size: 13px; font-weight: bold; background: #fff none; }
+ul.tab_spc_highschool li.typ01_select{ width:175px; margin-left: 0; }
+ul.tab_spc_highschool li.typ04_select{ width:172px; margin-right: 0; }
+ul.tab_spc_highschool.wide{}
+ul.tab_spc_highschool.wide li.typ03 { width:200px !important; }
+ul.tab_spc_highschool.wide li.typ04 { width:191px !important; }
+ul.tab_spc_highschool.wide li.typ03_select { width:200px !important; }
+ul.tab_spc_highschool.wide li.typ04_select { width:190px !important; width:192px; margin-right: 0; }
+
+
+/* Á÷¾÷º° °Ë»ö ¸µÅ©¹Ú½º */
+.search_link_box {overflow:hidden;position: relative;width:693px;margin-bottom:25px;border:1px solid #e8e8e8;border-bottom:none;}
+.search_link_box .tbl caption {display:none;}
+.search_link_box .tbl th,
+.search_link_box .tbl td {border-bottom:1px solid #e8e8e8;}
+.search_link_box .tbl th {text-align:center;background:#f9f9f9;border-right:1px solid #e8e8e8;}
+.search_link_box .tbl ul {position:relative;float:left;width:556px;*width:576px;padding:11px 0 0 20px;*padding-bottom:11px;}
+.search_link_box .tbl ul li {float:left;margin:0 15px 10px 0;font-size:11px;color:#797b82;font-family:"µ¸¿ò",dotum;letter-spacing:-1px;white-space:nowrap;}
+.search_link_box .tbl ul li a {text-decoration:underline;color:#797b82;}
+
+.btn_area_foreign {margin:12px 0 0;text-align:right;}
+
+/* Á÷¾÷º°, Áö¿ªº° °Ë»ö ¹Ú½º */
+.badsearch_searchbox {position: relative;margin-bottom: 15px;width:100%;height:35px;width:100%;background:#f4f5f7;}
+.badsearch_searchbox button {width:auto;margin:0;padding:0;border:none;background:none;font-size:0;line-height:0;cursor:pointer;}
+.badsearch_searchbox .tit {position: absolute;left:31px;top:10px;}
+.badsearch_searchbox label {position: absolute;left:31px;top:10px;width:172px;height:16px;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";filter: alpha(opacity=0);opacity:0;}
+.badsearch_searchbox input {display:block;position: absolute;left:230px;border:1px solid #c1c4d0;border-right:none;padding:0 10px;width:354px;*width: 332px;height:35px;*height:33px;color:#979797;font-weight:bold;line-height:35px;font-size:11px;font-family:"µ¸¿ò",dotum,arial,sans-serif;box-sizing: border-box;}
+.badsearch_searchbox .btn_search {display:block;position:absolute;right:0;top:0;width:112px;height:35px;}
+
+.badsearch_searchbox .search_result {position:relative;z-index:50;}
+.badsearch_searchbox .search_result .layer_box {display:block;position: absolute;top:35px;left:230px;padding:18px 10px;border:1px solid #c1c4d0;border-top:none;background:#fff;}
+.badsearch_searchbox .search_result .layer_box p {width:331px;margin:0 0 10px 0;color:#777;font-weight:bold;}
+.badsearch_searchbox .search_result .layer_box ul {padding:0 10px;border-top:1px solid #c1c4d0;}
+.badsearch_searchbox .search_result .layer_box ul li {margin-top:10px;}
+.badsearch_searchbox .search_result .layer_box ul li strong {color:#fe8500;font-weight:bold;}
+.badsearch_searchbox .search_result .layer_box ul li span {color:#fe8500;}
+.badsearch_searchbox .search_result .layer_box .btn_closed {position: absolute;right:10px;top:21px;}
+
+/* ÀÚ·áÅë */
+.resume_family {position:relative;overflow:hidden;width:695px;margin-bottom:25px;padding:11px 0 8px;border-top:1px solid #e9e9ea;border-bottom:1px solid #e9e9ea;}
+.resume_family dt {float:left;height:22px;margin-right:25px;padding:7px 14px 0 20px;background:url(//www.saraminimage.co.kr/ui/common/arrow_bullet01.png) no-repeat 100% 50%;}
+.resume_family dd {float:left;height:29px;border-left:1px solid #ebebeb;}
+.resume_family a {display:block;float:left;height:15px;padding:7px 19px;}
+.resume_family a img {vertical-align:middle;}
+
+.company_info_bar{background-color: #4868bf; position: relative; top: -1px; left: 0px; width: 100%; height: 28px;margin:0 auto;text-align:center;}
+.company_info_bar ul{display:inline;margin:0 auto;text-align:center;}
+.company_info_bar ul li{display:inline;list-style:none;position:relative;top:5px;}
+
+/* Ã¤¿ë¸ÞÀÎ ÇÏ´Ü ¹è³Ê À¯ÀÏ °¡¿îµ¥ Á¤·Ä ½ºÅ¸ÀÏ */
+.recruit_footer_banner{text-align:center;margin:0 auto;}
+
+/* °³ÀÎÈ¸¿ø, ±â¾÷È¸¿ø, °í°´¼¾ÅÍ ÄÁÅÙÃ÷ °£°Ý */
+.util_content {margin-top:46px;}
+.util_content_tbl {margin-top:46px;}
+.util_content_div {margin-top:46px;}
+.ie_check {width:30px;}
+@media only screen and (min-width:1280px){
+    .tit_area.height_auto h2{font-size:36px;}
+    .ie_check {width:55px;}
+}
+/* ±â¾÷È¸¿ø ·Î±×ÀÎ ·¹ÀÌ¾î */
+#login-layer-box {
+    font-family:'±¼¸²',gulim,sans-serif;
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:495px;
+    height:281px;
+    padding:37px 58px 40px;
+    background-color:#fff;
+    border:1px solid #52545a;
+    box-sizing:border-box;
+    -moz-box-sizing:border-box;
+}
+#login-layer-box p {
+    margin:0;
+}
+#login-layer-box button {
+    border:none;
+    cursor:pointer;
+    overflow:visible;
+    white-space: nowrap;
+}
+
+#login-layer-box .login-info-txt1 {
+    font-family:'µ¸¿ò',dotum,sans-serif;
+    font-size:14px;
+    color:#777;
+    text-align:center;
+    font-weight:bold;
+    letter-spacing:-1px;
+}
+#login-layer-box .login-info-txt2 {
+    margin-top:7px;
+    font-family:'µ¸¿ò',dotum,sans-serif;
+    font-size:16px;
+    color:#555;
+    text-align:center;
+    font-weight:bold;
+    letter-spacing:-1px;
+}
+#login-layer-box .login-info-txt2 strong {
+    color:#4e71f3;
+}
+#login-layer-box .login-form {
+    margin-top:25px;
+    position:relative;
+    width:379px;
+    height:93px;
+}
+#login-layer-box .id-input-box {
+    position:relative;
+    display:block;
+    width:277px;
+    height:43px;
+    background:url(//www.saraminimage.co.kr/ui/common/bg_login_inputbox.png) no-repeat 0 -45px;
+}
+#login-layer-box .pw-input-box {
+    position:relative;
+    display:block;
+    margin-top:7px;
+    width:277px;
+    height:43px;
+    background:url(//www.saraminimage.co.kr/ui/common/bg_login_inputbox.png) no-repeat 0 -45px;
+}
+#login-layer-box label {
+    position: absolute;
+    top: 14px;
+    left: 13px;
+    height: 24px;
+    color: #959595;
+    font-family:'±¼¸²',gulim,sans-serif;
+    font-size: 13px;
+    cursor:pointer;
+    font-weight: bold;
+}
+#login-layer-box input {
+    display: inline;
+    float: left;
+    width: 254px;
+    height: 18px;
+    padding: 0;
+    margin: 13px 0 0 13px;
+    border: 0 none;
+    font-family:'±¼¸²',gulim,sans-serif;
+    font-weight: bold;
+    font-size: 13px;
+    line-height: 18px;
+    color: #444;
+    letter-spacing: 0;
+    background-color: transparent;
+    outline: 0;
+}
+#login-layer-box .focus {
+    background-position:0 0;
+}
+#login-layer-box .btn-login {
+    position:absolute;
+    left:284px;
+    top:0;
+    width:95px;height:93px;
+    color:#fff;
+    font-family:'µ¸¿ò',dotum,sans-serif;
+    font-size:15px;
+    font-weight:bold;
+    background:url(//www.saraminimage.co.kr/ui/common/btn_login_bg.png) no-repeat 0 0;;
+}
+#login-layer-box .signup-forgotten {
+    overflow:hidden;
+    margin-top:20px;
+}
+#login-layer-box .signup-forgotten .sign-up {
+    float:left;
+    margin-right:10px;
+    color:#586cdc;
+}
+#login-layer-box .signup-forgotten .forgotten {
+    float:left;
+    color:#555;
+    font-weight:bold;
+}
+#login-layer-box .signup-forgotten span {
+    float:left;
+    position:relative;
+    top:1px;*top:-2px;
+    margin-right:8px;
+    width:1px;
+    height:11px;
+    background:url(//www.saraminimage.co.kr/ui/common/bg_vline.png) no-repeat 0 50%;
+}
+#login-layer-box .btn-layer-closed {
+    position:absolute;
+    right:18px;
+    top:18px;
+    background:transparent;
+}
+
+/* Á÷Á¾º°, Áö¿ªº° ¸ÞÀÎ app ¼Ò°³ */
+.job-app-intro,
+.local-app-intro{
+    overflow: hidden;
+    padding:30px 10px 10px;
+    border:1px solid #f0f0f0;
+    background-color:#f9f9f9;
+}
+.job-app-intro .job-txt,
+.local-app-intro .local-txt{
+    margin-bottom:25px;
+    text-align:center;
+}
+.job-app-intro .app-list,
+.local-app-intro .app-list{
+    overflow:hidden;
+    width:673px;*width: 648px;
+    padding:32px 0 0 25px;
+    border:1px solid #f0f0f0;
+    background-color:#fff;
+    box-sizing:border-box;
+}
+.job-app-intro .app-list li,
+.local-app-intro .app-list li{
+    float:left;
+    width:69px;
+    height:90px;
+    padding:0 23px 27px 0;
+}
+
+#container.container #wrap_left{left: -198px !important;}
+.sidewidget-fixed-resume {margin-left:445px;position:fixed;_position:absolute;left:50%;top:150px;_top:expression(document.compatMode=="CSS1Compat"? document.documentElement.scrollTop-150+"px" : body.scrollTop-150+"px");z-index:99;}
+.sidewidget-absolute-resume {margin-left:451px;position:absolute;top:342px;left:50%;_top:expression(document.compatMode=="CSS1Compat"? "342px" : "342px");color: #feff8e;}
+.sidewidget-absolute-resume-event {margin-left:445px;position:absolute;top:219px;left:50%;_top:expression(document.compatMode=="CSS1Compat"? "219px" : "219px");color: #feff8e;z-index:99;}
+.sidewidget-fixed-resume-event {margin-left:445px;position:fixed;_position:absolute;left:50%;top:274px;_top:expression(document.compatMode=="CSS1Compat"? document.documentElement.scrollTop+274+"px" : body.scrollTop+241+"px");z-index:99;}
+.sidewidget-fixed {margin-left:470px;position:fixed;_position:absolute;left:50%;top:10px;_top:expression(document.compatMode=="CSS1Compat"? document.documentElement.scrollTop+10+"px" : body.scrollTop+10+"px");z-index:101;}
+.sidewidget-absolute{margin-left:471px;position:absolute;top:342px;left:50%;_top:expression(document.compatMode=="CSS1Compat"? "342px" : "342px");color: #feff8e;z-index:101;}
+.sidewidget-absolute-bottom {position:absolute;top:auto;left:50%;bottom:450px;_bottom:expression(document.compatMode=="CSS1Compat"? "450px" : "450px");margin-left:451px;z-index:99;}
+.quick_apply_layer{ position: fixed; top: 50%; left: 50%; z-index: 110; margin: -152px 0 0 -277px;width: 554px; min-height: 304px;line-height: 0;background-color: #fff;}
+
+/* Å©·Ò safari ÇÙ */
+@media screen and (-webkit-min-device-pixel-ratio:0){
+    /*.util_wrap .util_inner {line-height:32px;}
+    .util_wrap .util_default {line-height:32px;}
+    .util_wrap .util_option {line-height:32px;}
+    .util_wrap .util_app_install {display:inline;padding:2px 0 2px 14px;background:url(//www.saraminimage.co.kr/ui/top/util_mobile.png) no-repeat 0 0px;}
+    .util_wrap .util_notif {display:inline;padding:2px 0 2px 19px;background:url(//www.saraminimage.co.kr/ui/top/util_bell.png) no-repeat 0 0px;}*/
+}
+/* firefox ÇÙ */
+@-moz-document url-prefix() {
+    /*.util_wrap .util_inner {line-height:32px;}
+    .util_wrap .util_default {line-height:32px;}
+    .util_wrap .util_option {line-height:32px;}
+    .util_wrap .util_app_install {display:inline;padding:2px 0 2px 14px;background:url(//www.saraminimage.co.kr/ui/top/util_mobile.png) no-repeat 0 0px;}
+    .util_wrap .util_notif {display:inline;padding:2px 0 2px 19px;background:url(//www.saraminimage.co.kr/ui/top/util_bell.png) no-repeat 0 0px;}*/
+}

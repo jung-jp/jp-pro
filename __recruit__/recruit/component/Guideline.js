@@ -132,88 +132,36 @@ define([
                 })
                 // 모집분야 추가
                 .on('click', '#division_item_wrap .btn_add', function() {
-
-
                     var state = self.getState() || {};
-                    console.log(state);
-                    var stateDivision = state.division;
-                    console.log(stateDivision);
-                    stateDivision.splice(-1, 0, '','','');
-                    console.log(stateDivision);
-                    self.setState({'division':stateDivision}, true);
-                    return;
-                    //
-                    // var $division_item_wrap = $('#division_item_wrap'),
-                    //     values = []
-                    //     ;
-                    //
-                    // $division_item_wrap.find('iniput[type=text]').each(function() {
-                    //     values.push(this.value);
-                    // });
-                    // for( var i=0; i<3; i++) {
-                    //     values.push('');
-                    // }
-                    //
-                    //
-                    // self.setState({'division':values}, true);
-                    
-                    // var html = '',
-                    //     span = '<span class="frm_input"><input type="text" class="frm_input02" name="division[]" id="division_{{seq}}"></span>',
-                    //     btnAdd = '<button type="button" class="btn_add"><span>추가</span></button>',
-                    //     btnDel = '<button type="button" class="btn_del"><span>삭제</span></button>',
-                    //     $division_item_wrap = $('#division_item_wrap'),
-                    //     inputCount = $division_item_wrap.find('input[name="division[]"]').size();
-                    //
-                    // [span, span, span].forEach(function (elt, idx) {
-                    //     console.log(inputCount + idx);
-                    //     html += elt.replace(/\{\{seq\}\}/g, inputCount + (idx + 1));
-                    // });
-                    //
-                    // if (inputCount >= 3) {
-                    //     $division_item_wrap.find('.btn_add').remove();
-                    //     html += btnDel + btnAdd ;
-                    // }
-                    //
-                    // $('#division_item_wrap').append('<li>' + html + '</li>');
+                    var values = state.division || [];
+                    values.push('');
+                    values.push('');
+                    values.push('');
+                    self.setState({'division':values}, true);
+
                 })
                 // 모집분야 삭제
                 .on('click', '#division_item_wrap .btn_del', function () {
                     var $division_item_wrap = $('#division_item_wrap'),
-                        $li = $division_item_wrap.find('li')
-                        ;
+                        $li = $division_item_wrap.find('li'),
+                        cur = $(this).closest('li').get(0),
+                        values = [];
+
                     if ($li.size() <= 1) {
                         return;
                     }
-
-                    var index = $li.index($(this).closest('li'));
-
+;
                     $li.each(function() {
-                        if( )
+                        if( cur !== this ) {
+                            $(this).find('input[type=text]').each(function(idx, elt) {
+                                console.log(elt);
+                                values.push(elt.value);
+                            });
+                        }
                     });
 
-
-
-                    // var $division_item_wrap = $('#division_item_wrap'),
-                    //     $li = $('#division_item_wrap').find('li'),
-                    //     btnAdd = '<button type="button" class="btn_add" id="btn_add_division"><span>추가</span></button>';
-                    // if ($li.size() > 1) {
-                    //     $(this).closest('li').remove();
-                    // }
-                    // $division_item_wrap.find('.btn_add').remove();
-                    // $li = $division_item_wrap.find('li');
-                    // $li.eq($li.size()-1).append(btnAdd);
-                    //
-                    //
-                    // var division =  {};
-                    //
-                    // $li.find('input[type=text]').each(function() {
-                    //     division[this.id] = this.value;
-                    // });
-
-                    //self.setState({'division': division});
-                    console.log(self.getState());
+                    self.setState({'division':values}, true);
                 })
-
             ;
         },
 
@@ -238,37 +186,30 @@ define([
             util.Option.make('edu_select', opts.education, state.edu_select);
 
             // 모집분야
-            // 빈값이면 3개.
-
-            var
-                html = '',
-                span = '<span class="frm_input"><input type="text" class="frm_input02" name="division[]" id="division_{{seq}}" value="{{value}}" placeholder="{{placeholder}}"></span> ',
+            var span = '<span class="frm_input"><input type="text" class="frm_input02" name="division[]" id="division_{{seq}}" value="{{value}}" placeholder="{{placeholder}}"></span> ',
                 btnAdd = '<button type="button" class="btn_add" id="btn_add_division"><span>추가</span></button> ',
                 btnDel = '<button type="button" class="btn_del" id="btn_del_division"><span>삭제</span></button> ',
                 placeholder = ['예)웹 디자인', '예)회계재무직', '예)전산개발 및 연구'],
                 $division_item_wrap = $('#division_item_wrap'),
-                inputCount = $division_item_wrap.find('input[name="division[]"]').size(),
-                __xx__
-                ;
+                conts = '',
+                html = [],
+                len = state.division.length;
 
-            // [span, span, span].forEach(function (elt, idx) {
-            console.log('length:'+state.division.length);
             state.division.forEach(function (elt, seq) {
                 // seq = inputCount + idx;
-                html += span.replace(/\{\{seq\}\}/g, seq)
-                           .replace(/\{\{placeholder\}\}/g, placeholder[seq] || '')
-                           .replace(/\{\{value\}\}/g, state.division[seq] || '')
-                ;
+                conts += span.replace(/\{\{seq\}\}/g, seq)
+                    .replace(/\{\{placeholder\}\}/g, placeholder[seq] || '')
+                    .replace(/\{\{value\}\}/g, state.division[seq] || '');
+                if ((seq + 1) % 3 === 0) {
+                    conts += btnDel;
+                    if (seq + 1 === len) {
+                        conts += btnAdd;
+                    }
+                    html.push('<li>' + conts + '</li>');
+                    conts = '';
+                }
             });
-
-            if (inputCount == 0) {
-                html += btnDel + btnAdd;
-            } else if (inputCount >= 3) {
-                $division_item_wrap.find('.btn_add').remove();
-                html += btnDel + btnAdd ;
-            }
-
-            $('#division_item_wrap').html('<li>' + html + '</li>');
+            $division_item_wrap.html(html.join(''));
 
             console.log(state);
             console.log('<<<<<<<<<<<<<<<<<<<<<<<render guideline');
