@@ -23,6 +23,8 @@ const   gulp        = require('gulp'),
         webpack     = require('webpack-stream'),
         browserSync = require('browser-sync'),
         runSequence = require('run-sequence'),
+        concat      = require('gulp-concat-util'),
+        uglify = require('gulp-uglify'),
 
         baseDir = 'app',
         dirs  = {
@@ -36,8 +38,8 @@ const   gulp        = require('gulp'),
             html : dirs.html + '/**/*.html',
             scss : dirs.scss + '/*.scss',
             css  : dirs.css  + '/**/*.css',
-            js   : dirs.js   + '/**/*.js',
-            jsx  : dirs.jsx  + '/**/*.jsx'
+            js   : dirs.js + ' /**/*.js',
+             jsx  : dirs.jsx  + '/**/*.jsx'
         };
 
 gulp
@@ -62,7 +64,7 @@ gulp
     .pipe(gulp.dest(dirs.js))
 )
 .task('packJs', () =>
-    gulp.src(dirs.js + '/app.js')
+    gulp.src(dirs.js + 'app.js')
     .pipe(webpack(
 		require('./webpack.config.js'),
 		null,
@@ -94,7 +96,16 @@ gulp
     gulp.watch(files.css, browserSync.reload);
 	gulp.watch(dirs.js + '/bundle.js', browserSync.reload);
 })
+.task('concat', function() {
+  gulp.src('smart_editor_basic_0729/js_src/*.js')
+    .pipe(uglify())
+    .pipe(concat('smart_editor_0729_all_5.js'))
+    // .pipe(concat.header('// file: <%= file.path %>\n'))
+    // .pipe(concat.footer('\n// end\n'))
+    .pipe(gulp.dest('smart_editor_basic_0729/js_src/dist'));
+})
 
 .task('default', (callback) => {
-	runSequence('jsClean',['style', 'reactify'], 'packJs', ['browserSync', 'watch'], callback);
+	// runSequence('jsClean',['style', 'reactify'], 'packJs', ['browserSync', 'watch'], callback);
+	runSequence('concat', callback);
 });
