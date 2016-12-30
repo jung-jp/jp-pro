@@ -7,17 +7,18 @@
 ### 1.2 가이드 목적 및 구성
 
 ## 2. 구분
-* html
+
+* *html*
     * meta
     * form
     * script
     * css
-* css
+* *css*
     * charset
-* javascript
+* *javascript*
     * ajax
-* php
-    * 내장함수
+* *php*
+    - 내장함수
         * iconv
         * iconv_set_encoding - 대상없음
         * iconv_strlen - 대상없음
@@ -33,15 +34,18 @@
         * mb_strcut
         * htmlspecialchars
         * html_entity_decode
-
+        * --- 미완료 구분선        
+        * header
+        * define
+        * print
+        * mysql_query
+        * iconv_set_encoding
         * mb_encode_numericentity - 예정
         * array_walk_recursive - 예정
-
         * mb_internal_encoding - 대상없음
         * mb_detect_encoding - 대상없음
         * mb_convert_case - 대상없음
         * mb_check_encoding - 대상없음
-
         * utf8_decode - 삭제예정
         * utf8_encode - 삭제예정
         * json_encode - 삭제예정
@@ -51,12 +55,36 @@
         * htmlentities - 삭제예정
         * proc_open - 삭제예정
 
-    * 사용자 정의 함수
+    - 사용자 함수
 
-    * 기타
-* 기타
+        * CutString
+        * cutText
+        * convertData
+        * MailSend
+        * Cmm_Mail
+        * Docruzer::setCharset
+        * $crzClient->SubmitQuery
+        * encodeJson
+        * decodeJson
+        * setEncoding
+        * setDecoding    
+        * headMeta()->setCharset
+
+    - 기타
+        * SQL
+            * CONVERT
+        * 검색엔진(DOCRUZER)
+        * 결제모듈
+
+* *기타*
     * xml
     * excel
+    * csv
+    * config
+        * mall.conf
+        * production.php (local, dev, stg ...)
+
+---
 
 ## 3. 변경 방법
 
@@ -70,14 +98,19 @@
         ```
         _?(euc[\-_]?kr|_?utf[\-_]?[0-9]+|cp949)
         ```
- - 오류/실수 최소화
+- 함수 수정
+    - cutString2 등 공용으로 사용하는 함수의 경우 내부로직을 수정하여 처리.
+    - 로직 변경으로 인해 출력결과가 기존과 달라지는 경우가 발생될 수 있음.
+    - 확인 후 수정필요.
+- 오류/실수 최소화
     - 대상이 많을 경우 한번에 찾아서 모두 바꾸지 말고 나누어서 여러번 변경한다.
     - 정규식으로 한번에 찾기보다 공백, 대소문자등 케이스별로 검색어를 분리하여 반복 수행
     - 폴더별 변경
     - 확장자별 변경
 
+---
 
-### html
+### *html*
 
 **meta**  
 meta 태그 charset 설정값 변경
@@ -128,7 +161,9 @@ form 전송을 위한 속성
     <script src="..." type="text/javascript" charset="utf-8"></script>
     ```
 
-### css
+---
+
+### *css*
 
 **charset**  
 css 파일 상단 charset 선언
@@ -146,7 +181,9 @@ css 파일 상단 charset 선언
     @charset "utf-8";
     ```
 
-### javascript
+---
+
+### *javascript*
 
 **ajax**  
 ajax 요청시 config 설정
@@ -171,9 +208,12 @@ ajax 요청시 config 설정
 
     ```
 
-### php
+---
 
-#### 내장함수
+### *php*
+
+#### ***내장함수***
+#
 
 **iconv**
 
@@ -358,7 +398,8 @@ html_entity_decode 인코딩 관련 부분 삭제
         html_entity_decode.*?(utf-?8|iso-8859-?1)  
         //*
     > 바꾸기 :
-        수정하지 않아도 무방하나 개발자의 판단에 따라 삭제한다.
+        수정하지 않아도 무방하나 삭제하는것을 권장.  
+        개발자의 판단에 따라 처리.
 
 * 코드 예)
     ```php
@@ -369,4 +410,325 @@ html_entity_decode 인코딩 관련 부분 삭제
     html_entity_decode(strip_tags($value1), ENT_COMPAT)
 
     ```
-utf-8 변경 코딩 가이드(작성중)
+
+---
+
+#### ***사용자 함수***   
+#
+
+**CutString**
+
+@deprecated Zend_View_Helper_CutString2 | CutString
+문자열을 자르고 말줌임을 처리를 하는 함수로 사람인 초기에 만들어짐.
+구버전 마크업에 최적화된 코드로 성능이 좋지 않음.  
+문자열 자르기는 css를 사용하거나 mb_strimwidth등을 사용하도록 한다.  
+
+
+* 변경방법 : 함수 수정
+
+    > 메소드 내부 로직을 mb_strimwidth로 변경하여 처리.  
+    > 변경후 말줄임처리가 기존과 달라지는 부분이 있어 수정이슈가 있음
+
+* 코드 예)
+    ```php  
+    <?
+    /* 변경전 */
+    public function cutString2($str, $len, $tail='..', $encoding = 'euc-kr') {    
+        return mb_strimwidth($str, 0, $len, $tail, $encoding);
+        ...
+    }
+    /* 변경후 */
+    public function cutString2($str, $len, $tail='..', $encoding = 'utf-8') {    
+        return mb_strimwidth($str, 0, $len, $tail, $encoding);
+        ...
+    }
+    ```
+
+**cutText**
+
+@deprecated Zend_View_Helper_CutText | CutText2
+문자열을 자르고 말줌임을 처리를 하는 함수  
+문자열 자르기는 css를 사용하거나 mb_strimwidth등을 사용하도록 한다.  
+
+
+* 변경방법 : 함수 수정
+
+    > 기본 $encode 파라미터를 utf-8로 변경하고 내부 로직을 일부 수정함.
+
+* 코드 예)
+    ```php  
+    <?
+    /* 변경전 */
+    public function cutText($str, $len, $encode = 'euc-kr') {
+    /* 변경후 */
+    public function cutText($str, $len, $encode = 'utf-8') {
+    ```
+
+**Cmm_Mail**
+
+Cmm_Mail::\__construct
+생성자의 기본 $charset=utf-8로 변경
+
+
+* 변경방법 : 함수 수정
+
+    > 파라미터 기본값 수정
+    > 찾기 :
+        $charset='euc-kr'  
+        //*
+    > 바꾸기 :
+        $charset='utf-8'  
+
+* 코드 예)
+    ```php  
+    <?    
+    /* 변경전 */
+    public function __construct($charset='euc-kr')
+    /* 변경후 */
+    public function __construct($charset='utf-8')
+    ```
+
+**setCharset**
+
+Saramin_Search_Docruzer:setCharset
+SearchEngineDAO::SubmitQuery(... , CS_UTF8)
+
+생성자의 기본 $charset = CS_UTF8 (lib에 선언된 상수값) 로 변경
+
+
+* 변경방법 : 함수 수정
+
+    > 파라미터 기본값 수정
+
+* 코드 예)
+    ```php  
+    <?
+    /* 변경전 */
+    public function setCharset($charset = CS_EUCKR) {}
+    /* 변경후 */
+    public function setCharset($charset = CS_UTF8) {}
+    ```
+
+**encodeJson**
+
+@deprecated Saramin_Model::encodeJson  
+\_encodeJson  
+
+ JSON 디코드를 utf-8 처리가 필요가 없어지므로 내장 함수 json_encode 사용한다.
+
+
+* 변경방법 : 찾아 바꾸기
+
+    > 찾기 :
+        Saramin_Model::encodeJson($entry, 'euc-kr');  
+        //*
+    > 바꾸기 :
+        euc-kr 파라미터 삭제 하거나
+        내장 함수 json_encode로 변경
+
+
+* 코드 예)
+    ```php  
+    <?
+    /* 변경전 */
+    Saramin_Model::encodeJson($entry)
+    /* 변경후 */
+    json_encode($entry)
+    ```
+
+**decodeJson**
+
+@deprecated Saramin_Model::decodeJson  
+\_?encodeJson  
+
+ JSON 디코드를 utf-8 처리가 필요가 없어지므로 내장 함수 json_decode 사용한다.
+
+
+* 변경방법 : 찾아 바꾸기
+
+    > Saramin_Model::decodeJson
+    > 찾기 :
+        Saramin_Model::decodeJson($entry, 'euc-kr');  
+        //*
+    > 바꾸기 :
+        euc-kr 파라미터 삭제 하거나
+        내장 함수 json_decode로 변경.
+
+
+* 코드 예)
+    ```php  
+    <?
+    /* 변경전 */
+    Saramin_Model::decodeJson($entry)
+    /* 변경후 */
+    json_decode($entry, true)
+    ```
+
+**setDecoding, setEncoding**
+
+xxxController::setDecodingStr,  setEncodingStr
+
+불필요한 인코딩 처리 삭제
+
+
+* 변경방법 : 찾아 바꾸기
+
+    > Saramin_Model::decodeJson
+    > 찾기 :
+        setDecoding[Str]?\(,
+        setEncoding[Str]?\(
+        //*
+    > 바꾸기 :
+        삭제
+
+* 코드 예)
+    ```php  
+    <?
+    /* 변경전 */
+    $name = setDecoding($this->_getParam('k'));
+    /* 변경후 */
+    $name = $this->_getParam('k');
+
+    ```
+
+headMeta()->setCharset('euc-kr');
+
+**setCharset**
+
+Zend_View_Helper_HeadMeta::setCharset
+
+인코딩 설정 변경
+
+
+* 변경방법 : 찾아 바꾸기
+
+    > 찾기 :
+        headMeta()->setCharset('euc-kr');
+    > 바꾸기 :
+        headMeta()->setCharset('utf-8');
+
+* 코드 예)
+    ```php  
+    <?
+    headMeta()->setCharset('utf-8');
+
+    ```
+
+* #### 기타
+
+**SQL**
+
+쿼리 구문 수정
+
+* 변경방법 : 찾아 바꾸기
+    > 찾기 :  
+         CONVERT
+    > 바꾸기 :  
+        삭제
+
+* 코드 예)
+
+    ```php
+    <?
+    /* 변경전 */
+    CONVERT(SCP.SCP_DEC('ETC', per.address_details) USING euckr)
+    /* 변경후 */
+    SCP.SCP_DEC('ETC', per.address_details))
+
+    ```
+
+**검색엔진(DOCRUZER)**
+
+검색엔진 설정 utf8로 변경, 색인등 재실행 (검색엔진 담당자)
+charset 설정 수정
+
+* 변경방법 : 찾아 바꾸기
+    > 찾기 :  
+         CS_EUCKR
+    > 바꾸기 :  
+        CS_UTF8
+
+* 코드 예)
+    ```php  
+    <?
+    /* 변경전 */
+    public function setCharset($charset = CS_EUCKR) {}
+    /* 변경후 */
+    public function setCharset($charset = CS_UTF8) {}
+    ```
+
+**결제모듈**
+
+***xpay***
+
+    utf8용 js 라이브러리로 변경
+
+* 변경방법 : 찾아 바꾸기
+    > 찾기 :  
+        /xpay/js/ (xpay 자바스크립트 파일 include 부분)
+    > 바꾸기 :  
+        utf8용 파일명으로 path 변경.
+
+* 코드 예)
+    ```html  
+    <?
+    /* 변경전 */
+    <script language="javascript" src="... /xpay/js/xpay_ub.js" type="text/javascript"></script>
+    /* 변경후 */
+    <script language="javascript" src=".../xpay/js/xpay_ub_utf-8.js" type="text/javascript"></script>
+    ```
+
+***inicis***
+
+    input charset utf-8로 변경
+
+* 변경방법 : 찾아 바꾸기
+    > 찾기 :  
+        $this->formHidden('charset', 'EUC-KR');
+    > 바꾸기 :  
+        $this->formHidden('charset', 'UTF-8');
+
+* 코드 예)
+    ```php
+    <?
+    /* 변경전 */
+    echo $this->formHidden('charset', 'EUC-KR');
+    /* 변경후 */
+    echo $this->formHidden('charset', 'UTF-8');
+    ```
+
+---
+
+### *기타*
+
+
+**config**
+
+
+***mall.conf***  
+    > output_UTF8 = 0  
+    > 변경  => output_UTF8 = 1  
+
+***production.php (local, dev, stg ...)***  
+    > charset 설정 관련부분을 euc-kr에서 utf-8로 변경한다.
+
+
+**xml**  
+
+charset 설정값 변경
+
+* 변경방법 : 찾아 바꾸기
+    > 찾기 : <?xml version="1.0" encoding="euc-kr"?>  
+    > 바꾸기 : <?xml version="1.0" encoding="utf-8"?>
+
+* 코드 예)
+    ```xml
+    <!-- 변경전  -->
+    <?xml version="1.0" encoding="euc-kr"?>
+    <!-- 변경후 -->
+    <?xml version="1.0" encoding="utf-8"?>
+    ```
+
+**excel**  
+
+**csv**  
