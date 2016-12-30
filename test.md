@@ -698,18 +698,18 @@ charset 설정 수정
     /* 변경전 */
     echo $this->formHidden('charset', 'EUC-KR');
     /* 변경후 */
-    echo $this->formHidden('charset', 'UTF-8');
+    echo $this->formHidden('charset', 'UTF-8');  
     ```  
 
 **config**
 
 
-***mall.conf***  
-    > output_UTF8 = 0  
-    > 변경  => output_UTF8 = 1  
+***mall.conf***   
+> output_UTF8 = 0  
+> 변경  => output_UTF8 = 1  
 
 ***production.php (local, dev, stg ...)***  
-    > charset 설정 관련부분을 euc-kr에서 utf-8로 변경한다.
+> charset 설정 관련부분을 euc-kr에서 utf-8로 변경한다.
 
 
 **xml**  
