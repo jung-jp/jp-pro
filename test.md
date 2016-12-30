@@ -413,7 +413,7 @@ html_entity_decode 인코딩 관련 부분 삭제
 
 ---
 
-#### ***사용자 함수***   
+#### ***사용자 함수***  
 #
 
 **CutString**
@@ -614,7 +614,7 @@ Zend_View_Helper_HeadMeta::setCharset
 
     ```
 
-* #### 기타
+#### ***기타***  
 
 **SQL**
 
@@ -695,11 +695,11 @@ charset 설정 수정
     echo $this->formHidden('charset', 'EUC-KR');
     /* 변경후 */
     echo $this->formHidden('charset', 'UTF-8');
-    ```
+    ```  
 
 ---
 
-### *기타*
+### *기타*  
 
 
 **config**
